@@ -72,7 +72,7 @@
                 }
             }
         },
-        "/documents/process-raw": {
+        "/documents/raw": {
             "post": {
                 "description": "Applies the specified processing rules to raw text content of a given file type and returns the processed output. Currently only \"markdown\" is supported as a file type",
                 "consumes": [

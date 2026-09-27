@@ -66,7 +66,7 @@ type ProcessRawRequest struct {
 //	@Failure 201 {object} map[string]string "Unsupported file type"
 //	@Failure 400 {object} map[string]string "Invalid request body"
 //	@Failure 500 {object} map[string]string "Processing error"
-//	@Router /documents/process-raw [post]
+//	@Router /documents/raw [post]
 func ProcessRaw(c fiber.Ctx) error {
 	req := new(ProcessRawRequest)
 	if err := c.Bind().Body(req); err != nil {
