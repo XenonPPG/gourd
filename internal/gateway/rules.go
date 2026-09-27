@@ -23,9 +23,9 @@ type RuleDTO struct {
 //	@Router /rules [get]
 func ListRules(c fiber.Ctx) error {
 	result := make([]RuleDTO, 0)
-	for id, r := range rule.Registry {
+	for _, r := range rule.SortedRegistry {
 		result = append(result, RuleDTO{
-			ID:               id,
+			ID:               r.ID,
 			Name:             r.Name,
 			Description:      r.Description,
 			EnabledByDefault: r.EnabledByDefault,

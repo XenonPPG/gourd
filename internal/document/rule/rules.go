@@ -9,6 +9,7 @@ import (
 )
 
 type Rule struct {
+	ID               int
 	Name             string
 	Description      string
 	Adapters         map[domain.FileType]adapter.AnyAdapter
@@ -39,13 +40,24 @@ var ruleDefaults = []struct {
 	},
 }
 
-var Registry = buildRegistry()
+var Registry = buildRegistryMap()
+var SortedRegistry = buildRegistry()
 
-func buildRegistry() map[int]Rule {
+func buildRegistryMap() map[int]Rule {
 	reg := make(map[int]Rule)
 	for i, def := range ruleDefaults {
 		def.Rule.EnabledByDefault = def.Enabled
 		reg[i+1] = def.Rule
+	}
+	return reg
+}
+
+func buildRegistry() []Rule {
+	reg := make([]Rule, 0, len(ruleDefaults))
+	for i, def := range ruleDefaults {
+		def.Rule.ID = i + 1
+		def.Rule.EnabledByDefault = def.Enabled
+		reg = append(reg, def.Rule)
 	}
 	return reg
 }
