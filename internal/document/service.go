@@ -2,12 +2,21 @@ package document
 
 import (
 	"fmt"
+	"gourd/internal/counter"
 	"gourd/internal/document/document_instance"
 	"gourd/internal/document/rule"
 	"gourd/internal/domain"
 	"io"
 	"strings"
 )
+
+type Service struct {
+	counterService *counter.Service
+}
+
+func New(counterService *counter.Service) *Service {
+	return &Service{counterService: counterService}
+}
 
 func NewDocument(filename string) (Document, error) {
 	parts := strings.Split(filename, ".")
@@ -23,7 +32,7 @@ func NewDocument(filename string) (Document, error) {
 	}
 }
 
-func Process(in io.Reader, out io.Writer, ruleIDs []int, filename string) error {
+func (s *Service) Process(in io.Reader, out io.Writer, ruleIDs []int, filename string) error {
 	doc, err := NewDocument(filename)
 	if err != nil {
 		return err
@@ -37,23 +46,26 @@ func Process(in io.Reader, out io.Writer, ruleIDs []int, filename string) error 
 		rules = append(rules, r)
 	}
 
-	if err := doc.Read(in); err != nil {
+	if err = doc.Read(in); err != nil {
 		return fmt.Errorf("read: %w", err)
 	}
 
-	if err := doc.Apply(rules); err != nil {
+	if err = doc.Apply(rules); err != nil {
 		return fmt.Errorf("apply: %w", err)
 	}
 
-	if err := doc.Write(out); err != nil {
+	if err = doc.Write(out); err != nil {
 		return fmt.Errorf("write: %w", err)
 	}
+
+	s.counterService.Increment()
+
 	return nil
 }
 
-func ProcessRaw(text string, ruleIDs []int, fileType domain.FileType) (string, error) {
+func (s *Service) ProcessRaw(text string, ruleIDs []int, fileType domain.FileType) (string, error) {
 	var buf strings.Builder
-	err := Process(strings.NewReader(text), &buf, ruleIDs, string(fileType))
+	err := s.Process(strings.NewReader(text), &buf, ruleIDs, string(fileType))
 	if err != nil {
 		return "", err
 	}

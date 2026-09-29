@@ -21,7 +21,7 @@ type RuleDTO struct {
 //	@Produce json
 //	@Success 200 {array} RuleDTO "List of rules"
 //	@Router /rules [get]
-func ListRules(c fiber.Ctx) error {
+func (s *Service) ListRules(c fiber.Ctx) error {
 	result := make([]RuleDTO, 0)
 	for _, r := range rule.SortedRegistry {
 		result = append(result, RuleDTO{

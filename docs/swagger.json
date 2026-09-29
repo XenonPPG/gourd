@@ -12,6 +12,26 @@
     },
     "basePath": "/",
     "paths": {
+        "/counter": {
+            "get": {
+                "description": "Returns the current value of the counter",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "counter"
+                ],
+                "summary": "Get counter value",
+                "responses": {
+                    "200": {
+                        "description": "Current counter value",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
         "/documents/file": {
             "post": {
                 "description": "Uploads a document file and applies the specified processing rules to it, returning the processed binary content",

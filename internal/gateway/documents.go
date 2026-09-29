@@ -2,7 +2,6 @@ package gateway
 
 import (
 	"bytes"
-	"gourd/internal/document"
 	"gourd/internal/domain"
 	"mime/multipart"
 
@@ -27,7 +26,7 @@ type ProcessDocumentRequest struct {
 //	@Failure		400		{object}	map[string]string	"Invalid request body"
 //	@Failure		500		{object}	map[string]string	"File processing error"
 //	@Router			/documents/file [post]
-func ProcessFile(c fiber.Ctx) error {
+func (s *Service) ProcessFile(c fiber.Ctx) error {
 	req := new(ProcessDocumentRequest)
 	if err := c.Bind().Body(req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
@@ -40,7 +39,7 @@ func ProcessFile(c fiber.Ctx) error {
 	defer src.Close()
 
 	var buf bytes.Buffer
-	if err := document.Process(src, &buf, req.Rules, req.File.Filename); err != nil {
+	if err = s.documentService.Process(src, &buf, req.Rules, req.File.Filename); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -67,7 +66,7 @@ type ProcessRawRequest struct {
 //	@Failure 400 {object} map[string]string "Invalid request body"
 //	@Failure 500 {object} map[string]string "Processing error"
 //	@Router /documents/raw [post]
-func ProcessRaw(c fiber.Ctx) error {
+func (s *Service) ProcessRaw(c fiber.Ctx) error {
 	req := new(ProcessRawRequest)
 	if err := c.Bind().Body(req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
@@ -77,7 +76,7 @@ func ProcessRaw(c fiber.Ctx) error {
 		return c.Status(fiber.StatusCreated).JSON(fiber.Map{"error": "unsupported file type"})
 	}
 
-	output, err := document.ProcessRaw(req.Text, req.Rules, fileType)
+	output, err := s.documentService.ProcessRaw(req.Text, req.Rules, fileType)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}

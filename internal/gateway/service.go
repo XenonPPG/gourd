@@ -1,6 +1,23 @@
 package gateway
 
-import "github.com/gofiber/fiber/v3"
+import (
+	"gourd/internal/counter"
+	"gourd/internal/document"
+
+	"github.com/gofiber/fiber/v3"
+)
+
+type Service struct {
+	documentService *document.Service
+	counterService  *counter.Service
+}
+
+func New(documentService *document.Service, counterService *counter.Service) *Service {
+	return &Service{
+		documentService: documentService,
+		counterService:  counterService,
+	}
+}
 
 // Health checks the service status
 //
@@ -10,6 +27,6 @@ import "github.com/gofiber/fiber/v3"
 //	@Produce plain
 //	@Success 200 {string} string "Healthy :)"
 //	@Router /health [get]
-func Health(c fiber.Ctx) error {
+func (s *Service) Health(c fiber.Ctx) error {
 	return c.SendString("Healthy :)")
 }
