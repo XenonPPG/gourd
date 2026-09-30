@@ -15,6 +15,7 @@ import (
 	"gourd/internal/gateway"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
 )
 
 const (
@@ -49,6 +50,12 @@ func run() error {
 	gatewayService := gateway.New(documentService, counterService)
 
 	app := fiber.New()
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowCredentials: false,
+	}))
 
 	app.Get("/health", gatewayService.Health)
 	app.Get("/rules", gatewayService.ListRules)
