@@ -2,11 +2,13 @@ package counter
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 const storagePath = "./storage/counter.txt"
@@ -29,6 +31,7 @@ func New() (*Service, error) {
 		if err := s.saveToFile(0); err != nil {
 			return nil, fmt.Errorf("initial save error: %w", err)
 		}
+		go s.startTicker()
 		return s, nil
 	} else if err != nil {
 		return nil, fmt.Errorf("read file error: %w", err)
@@ -41,7 +44,19 @@ func New() (*Service, error) {
 	}
 
 	s.value = num
+	go s.startTicker()
 	return s, nil
+}
+
+func (s *Service) startTicker() {
+	ticker := time.NewTicker(10 * time.Minute)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		if err := s.Save(); err != nil {
+			log.Println("counter save error: " + err.Error())
+		}
+	}
 }
 
 func (s *Service) GetValue() int64 {
