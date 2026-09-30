@@ -26,7 +26,11 @@ var ruleDefaults = []struct {
 		{oldStr: "«", newStr: "\""},
 		{oldStr: "»", newStr: "\""},
 	})},
-	{true, newLineEditor(
+	{true, newReplacer("Заменить стрелки", "Заменяет ← → на <- ->", []replacerTemplate{
+		{oldStr: "←", newStr: "<-"},
+		{oldStr: "→", newStr: "->"},
+	})},
+	{false, newLineEditor(
 		"Убрать `;`",
 		"Убирает точку с запятой в конце предложений",
 		func(s string) (string, bool, error) {
