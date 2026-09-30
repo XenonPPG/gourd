@@ -1,0 +1,48 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+docker-compose.yaml
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Documentation
+README.md
+*.md
+
+# IDE and editors
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.out
+/vendor/
+/bin/
+/dist/
+
+# Testing
+*.test
+*.prof
+coverage.txt
+coverage.html
+
+# CI/CD
+.github
+
+# Storage
+storage
+
+# OS
+.DS_Store
+Thumbs.db

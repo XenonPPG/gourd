@@ -1,0 +1,10 @@
+services:
+  gourd:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gourd
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./storage:/root/storage
