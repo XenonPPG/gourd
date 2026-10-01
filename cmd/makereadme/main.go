@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gourd/internal/document/rule"
 	"gourd/internal/utils"
+	"log"
 	"os"
 	"strings"
 )
@@ -23,15 +24,13 @@ func main() {
 
 	input, err := os.ReadFile("./cmd/makereadme/template.md")
 	if err != nil {
-		fmt.Println("Error reading file:", err)
-		return
+		log.Fatal("Error reading file:", err)
 	}
 
 	output := strings.Replace(string(input), "{{RULES}}", text.String(), 1)
 
 	err = os.WriteFile("./README.md", []byte(output), 0644)
 	if err != nil {
-		fmt.Println("Error writing file:", err)
-		return
+		log.Fatal("Error writing file:", err)
 	}
 }
