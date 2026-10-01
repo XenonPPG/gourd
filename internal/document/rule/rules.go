@@ -65,7 +65,7 @@ var categories = []Category{
 		Name: "Особое",
 		Rules: []Rule{
 			{
-				Name:        "Убрать ';'",
+				Name:        "Убрать точку с запятой",
 				Description: "Убирает точку с запятой в конце предложений",
 				Adapters: adapter.NewLineEditor(func(s string) (string, bool, error) {
 					trimmed := strings.TrimSpace(s)

@@ -17,7 +17,7 @@ func main() {
 			text.WriteString(fmt.Sprintf(
 				"- %s: `%s`\n",
 				utils.EscapeMarkdownV2(r.Name),
-				utils.EscapeMarkdownV2(r.Description),
+				r.Description,
 			))
 		}
 	}
