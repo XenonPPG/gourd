@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"fmt"
+	"gourd/internal/domain"
 )
 
 type AnyAdapter interface {
@@ -24,3 +25,5 @@ func (w adapterWrapper[T]) Apply(doc any) error {
 func Wrap[T any](fn Effect[T]) AnyAdapter {
 	return adapterWrapper[T]{effect: fn}
 }
+
+type AdaptersMap map[domain.FileType]AnyAdapter

@@ -1,7 +1,6 @@
-package rule
+package adapter
 
 import (
-	"gourd/internal/document/rule/adapter"
 	"gourd/internal/domain"
 	"slices"
 	"strings"
@@ -11,8 +10,8 @@ import (
 
 type effectFunc func(string) (output string, toBreak bool, err error)
 
-func markdownLineEditor(effect effectFunc) adapter.AnyAdapter {
-	return adapter.Wrap(func(document *string) error {
+func markdownLineEditor(effect effectFunc) AnyAdapter {
+	return Wrap(func(document *string) error {
 		lines := strings.Split(*document, "\n")
 		for i, line := range lines {
 			newLine, toBreak, err := effect(line)
@@ -29,8 +28,8 @@ func markdownLineEditor(effect effectFunc) adapter.AnyAdapter {
 	})
 }
 
-func docxLineEditor(effect effectFunc) adapter.AnyAdapter {
-	return adapter.Wrap(func(document *docx.Docx) error {
+func docxLineEditor(effect effectFunc) AnyAdapter {
+	return Wrap(func(document *docx.Docx) error {
 		for _, item := range document.Document.Body.Items {
 			para, ok := item.(*docx.Paragraph)
 			if !ok {
@@ -62,13 +61,9 @@ func docxLineEditor(effect effectFunc) adapter.AnyAdapter {
 	})
 }
 
-func newLineEditor(name, description string, effect effectFunc) Rule {
-	return Rule{
-		Name:        name,
-		Description: description,
-		Adapters: map[domain.FileType]adapter.AnyAdapter{
-			domain.Markdown: markdownLineEditor(effect),
-			domain.Docx:     docxLineEditor(effect),
-		},
+func NewLineEditor(effect effectFunc) AdaptersMap {
+	return AdaptersMap{
+		domain.Markdown: markdownLineEditor(effect),
+		domain.Docx:     docxLineEditor(effect),
 	}
 }

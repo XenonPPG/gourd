@@ -169,7 +169,7 @@
         },
         "/rules": {
             "get": {
-                "description": "Returns the full registry of document processing rules, including their id, name, description and default enabled state",
+                "description": "Returns the full registry of document processing rules grouped by category. Each category contains its id, name and a list of rules; each rule has an id, name, description and default enabled state",
                 "produces": [
                     "application/json"
                 ],
@@ -179,11 +179,11 @@
                 "summary": "List available rules",
                 "responses": {
                     "200": {
-                        "description": "List of rules",
+                        "description": "List of rule categories with their rules",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/gateway.RuleDTO"
+                                "$ref": "#/definitions/gateway.CategoryDTO"
                             }
                         }
                     }
@@ -192,6 +192,20 @@
         }
     },
     "definitions": {
+        "gateway.CategoryDTO": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "rules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/gateway.RuleDTO"
+                    }
+                }
+            }
+        },
         "gateway.ProcessRawRequest": {
             "type": "object",
             "properties": {

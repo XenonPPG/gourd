@@ -39,7 +39,7 @@ func (s *Service) Process(in io.Reader, out io.Writer, ruleIDs []int, filename s
 	}
 	rules := make([]rule.Rule, 0, len(ruleIDs))
 	for _, id := range ruleIDs {
-		r, ok := rule.Registry[id]
+		r, ok := rule.QuickRegistry[id]
 		if !ok {
 			return fmt.Errorf("rule with id %d not found", id)
 		}
