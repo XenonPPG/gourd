@@ -58,7 +58,7 @@ func run() error {
 	}))
 
 	app.Get("/health", gatewayService.Health)
-	app.Get("/rules", gatewayService.ListRules)
+	app.Get("/rules/:type", gatewayService.ListRules)
 	app.Get("/counter", gatewayService.GetCounterValue)
 
 	docs := app.Group("/documents")

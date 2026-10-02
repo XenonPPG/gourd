@@ -167,16 +167,25 @@
                 }
             }
         },
-        "/rules": {
+        "/rules/{type}": {
             "get": {
-                "description": "Returns the full registry of document processing rules grouped by category. Each category contains its id, name and a list of rules; each rule has an id, name, description and default enabled state",
+                "description": "Returns the registry of document processing rules grouped by category, filtered by the file type from the path. Each category contains its name and a list of rules; each rule has an id, name, description and default enabled state. Only rules that have an adapter for the requested file type are included. Categories without applicable rules are still returned, with an empty rules list.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "rules"
                 ],
-                "summary": "List available rules",
+                "summary": "List available rules for a file type",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "File type the rules are requested for",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "List of rule categories with their rules",
@@ -184,6 +193,15 @@
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/gateway.CategoryDTO"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Rule registry contains no categories (response body: {\\\"error\\\": \\\"no rules found for file type\\\"})",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
                             }
                         }
                     }
