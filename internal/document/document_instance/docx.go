@@ -3,10 +3,10 @@ package document_instance
 import (
 	"archive/zip"
 	"bytes"
+	"fmt"
 	"gourd/internal/constants"
 	"gourd/internal/document/rule"
 	"gourd/internal/domain"
-	"gourd/internal/utils"
 	"io"
 
 	"github.com/fumiama/go-docx"
@@ -29,7 +29,7 @@ func (d *DocxDocument) Read(in io.Reader) error {
 	if err != nil {
 		return err
 	}
-	if err := utils.ValidateZipEntries(zr.File); err != nil {
+	if err := validateZipEntries(zr.File); err != nil {
 		return err
 	}
 
@@ -50,6 +50,26 @@ func (d *DocxDocument) Apply(rules []rule.Rule) error {
 	for _, r := range rules {
 		if err := r.Apply(d.document, domain.Docx); err != nil {
 			return err
+		}
+	}
+	return nil
+}
+
+func validateZipEntries(files []*zip.File) error {
+	var total uint64
+	for _, f := range files {
+		if f.UncompressedSize64 > constants.MaxSingleFileSize {
+			return fmt.Errorf("file %q declares size %d, exceeds limit", f.Name, f.UncompressedSize64)
+		}
+		total += f.UncompressedSize64
+		if total > constants.MaxTotalSize {
+			return fmt.Errorf("total uncompressed size exceeds limit")
+		}
+		if f.CompressedSize64 > 0 {
+			ratio := f.UncompressedSize64 / f.CompressedSize64
+			if ratio > constants.MaxCompressionRatio {
+				return fmt.Errorf("file %q has suspicious compression ratio %d", f.Name, ratio)
+			}
 		}
 	}
 	return nil
