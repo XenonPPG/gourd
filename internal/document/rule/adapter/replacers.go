@@ -45,7 +45,7 @@ func docxReplacer(templates []ReplacerTemplate) AnyAdapter {
 	})
 }
 
-func textReplacer(templates []ReplacerTemplate, escapeMarkdown bool) AnyAdapter {
+func commonTextReplacer(templates []ReplacerTemplate, escapeMarkdown bool) AnyAdapter {
 	return Wrap(func(document *string) error {
 		for _, template := range templates {
 			var newStr string
@@ -68,8 +68,8 @@ func textReplacer(templates []ReplacerTemplate, escapeMarkdown bool) AnyAdapter 
 
 func NewReplacer(templates []ReplacerTemplate) AdaptersMap {
 	return AdaptersMap{
-		domain.Text:     textReplacer(templates, false),
-		domain.Markdown: textReplacer(templates, true),
+		domain.Text:     commonTextReplacer(templates, false),
+		domain.Markdown: commonTextReplacer(templates, true),
 		domain.Docx:     docxReplacer(templates),
 	}
 }
