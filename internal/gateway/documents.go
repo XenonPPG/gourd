@@ -71,12 +71,8 @@ func (s *Service) ProcessRaw(c fiber.Ctx) error {
 	if err := c.Bind().Body(req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	fileType := domain.FileType(req.FileType)
-	if fileType != domain.Markdown {
-		return c.Status(fiber.StatusCreated).JSON(fiber.Map{"error": "unsupported file type"})
-	}
 
-	output, err := s.documentService.ProcessRaw(req.Text, req.Rules, fileType)
+	output, err := s.documentService.ProcessRaw(req.Text, req.Rules, domain.FileType(req.FileType))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}

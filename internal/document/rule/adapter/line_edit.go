@@ -10,7 +10,7 @@ import (
 
 type effectFunc func(string) (output string, toBreak bool, err error)
 
-func markdownLineEditor(effect effectFunc) AnyAdapter {
+func textLineEditor(effect effectFunc) AnyAdapter {
 	return Wrap(func(document *string) error {
 		lines := strings.Split(*document, "\n")
 		for i, line := range lines {
@@ -63,7 +63,8 @@ func docxLineEditor(effect effectFunc) AnyAdapter {
 
 func NewLineEditor(effect effectFunc) AdaptersMap {
 	return AdaptersMap{
-		domain.Markdown: markdownLineEditor(effect),
+		domain.Text:     textLineEditor(effect),
+		domain.Markdown: textLineEditor(effect),
 		domain.Docx:     docxLineEditor(effect),
 	}
 }

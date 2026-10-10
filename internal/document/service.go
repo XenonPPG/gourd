@@ -18,13 +18,19 @@ func New(counterService *counter.Service) *Service {
 	return &Service{counterService: counterService}
 }
 
-func NewDocument(filename string) (Document, error) {
+func getFileType(filename string) domain.FileType {
 	parts := strings.Split(filename, ".")
-	fileType := domain.FileType(parts[len(parts)-1])
+	return domain.FileType(parts[len(parts)-1])
+}
+
+func NewDocument(filename string) (Document, error) {
+	fileType := getFileType(filename)
 
 	switch fileType {
+	case domain.Text:
+		return &document_instance.CommonTextDocument{EscapeMarkdown: false}, nil
 	case domain.Markdown:
-		return &document_instance.MarkdownDocument{}, nil
+		return &document_instance.CommonTextDocument{EscapeMarkdown: true}, nil
 	case domain.Docx:
 		return &document_instance.DocxDocument{}, nil
 	default:
@@ -64,6 +70,10 @@ func (s *Service) Process(in io.Reader, out io.Writer, ruleIDs []int, filename s
 }
 
 func (s *Service) ProcessRaw(text string, ruleIDs []int, fileType domain.FileType) (string, error) {
+	if fileType != domain.Text && fileType != domain.Markdown {
+		return "", fmt.Errorf("unsupported file type: %v", fileType)
+	}
+
 	var buf strings.Builder
 	err := s.Process(strings.NewReader(text), &buf, ruleIDs, string(fileType))
 	if err != nil {

@@ -3,6 +3,7 @@ package domain
 type FileType string
 
 const (
-	Docx     FileType = "docx"
+	Text     FileType = "txt"
 	Markdown FileType = "md"
+	Docx     FileType = "docx"
 )

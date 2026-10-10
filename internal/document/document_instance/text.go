@@ -3,14 +3,16 @@ package document_instance
 import (
 	"gourd/internal/document/rule"
 	"gourd/internal/domain"
+	"gourd/internal/utils"
 	"io"
 )
 
-type MarkdownDocument struct {
-	content string
+type CommonTextDocument struct {
+	content        string
+	EscapeMarkdown bool
 }
 
-func (doc *MarkdownDocument) Read(in io.Reader) error {
+func (doc *CommonTextDocument) Read(in io.Reader) error {
 	bytes, err := io.ReadAll(in)
 	if err != nil {
 		return err
@@ -19,9 +21,11 @@ func (doc *MarkdownDocument) Read(in io.Reader) error {
 	return nil
 }
 
-func (doc *MarkdownDocument) Apply(rules []rule.Rule) error {
+func (doc *CommonTextDocument) Apply(rules []rule.Rule) error {
+	fileType := utils.Ternary(doc.EscapeMarkdown, domain.Markdown, domain.Text)
+
 	for _, r := range rules {
-		err := r.Apply(&doc.content, domain.Markdown)
+		err := r.Apply(&doc.content, fileType)
 		if err != nil {
 			return err
 		}
@@ -30,7 +34,7 @@ func (doc *MarkdownDocument) Apply(rules []rule.Rule) error {
 	return nil
 }
 
-func (doc *MarkdownDocument) Write(out io.Writer) error {
+func (doc *CommonTextDocument) Write(out io.Writer) error {
 	if sw, ok := out.(io.StringWriter); ok {
 		_, err := sw.WriteString(doc.content)
 		return err
