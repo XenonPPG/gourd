@@ -11,7 +11,7 @@ import (
 
 func main() {
 	var text strings.Builder
-	for _, cat := range rule.Registry {
+	for _, cat := range rule.Registry() {
 		text.WriteString(fmt.Sprintf("### %s\n", cat.Name))
 		for _, r := range cat.Rules {
 			text.WriteString(fmt.Sprintf(

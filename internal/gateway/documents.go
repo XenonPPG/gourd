@@ -10,7 +10,7 @@ import (
 
 type ProcessDocumentRequest struct {
 	File  *multipart.FileHeader `form:"file"`
-	Rules []int                 `form:"rule"`
+	Rules []string              `form:"rule"`
 }
 
 // ProcessFile processes an uploaded document file
@@ -48,9 +48,9 @@ func (s *Service) ProcessFile(c fiber.Ctx) error {
 }
 
 type ProcessRawRequest struct {
-	Text     string `json:"text,omitempty"`
-	FileType string `json:"type,omitempty"`
-	Rules    []int  `json:"rules,omitempty"`
+	Text     string   `json:"text,omitempty"`
+	FileType string   `json:"type,omitempty"`
+	Rules    []string `json:"rules,omitempty"`
 }
 
 // ProcessRaw processes raw text content as a document

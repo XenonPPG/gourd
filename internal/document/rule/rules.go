@@ -9,7 +9,7 @@ import (
 )
 
 type Rule struct {
-	ID               int
+	ID               string
 	Name             string
 	Description      string
 	Adapters         adapter.AdaptersMap
@@ -26,18 +26,21 @@ var categories = []Category{
 		Name: "Рекомендованное",
 		Rules: []Rule{
 			{
+				ID:               "replace-en-dash",
 				Name:             "Заменить тире",
 				Description:      "Заменяет — на –",
 				Adapters:         adapter.NewSimpleReplacer("—", "–"),
 				EnabledByDefault: true,
 			},
 			{
+				ID:               "replace-multiplication",
 				Name:             "Заменить умножение",
 				Description:      "Заменяет × на *",
 				Adapters:         adapter.NewSimpleReplacer("×", "*"),
 				EnabledByDefault: true,
 			},
 			{
+				ID:          "replace-quotes",
 				Name:        "Заменить кавычки",
 				Description: "Заменяет «» на \"\"",
 				Adapters: adapter.NewReplacer([]adapter.ReplacerTemplate{
@@ -52,6 +55,7 @@ var categories = []Category{
 		Name: "Другое",
 		Rules: []Rule{
 			{
+				ID:          "replace-arrows",
 				Name:        "Заменить стрелки",
 				Description: "Заменяет ← → на <- ->",
 				Adapters: adapter.NewReplacer([]adapter.ReplacerTemplate{
@@ -65,6 +69,7 @@ var categories = []Category{
 		Name: "Особое",
 		Rules: []Rule{
 			{
+				ID:          "remove-semicolon",
 				Name:        "Убрать точку с запятой",
 				Description: "Убирает точку с запятой в конце предложений",
 				Adapters: adapter.NewLineEditor(func(s string) (string, bool, error) {
@@ -80,22 +85,14 @@ var categories = []Category{
 	},
 }
 
-var Registry = assignIDs(categories)
-var QuickRegistry = indexByID(Registry)
-
-func assignIDs(cats []Category) []Category {
-	nextRuleID := 1
-	for i := range cats {
-		for j := range cats[i].Rules {
-			cats[i].Rules[j].ID = nextRuleID
-			nextRuleID++
-		}
-	}
-	return cats
+func Registry() []Category {
+	return categories
 }
 
-func indexByID(cats []Category) map[int]Rule {
-	reg := make(map[int]Rule)
+var QuickRegistry = indexByID(Registry())
+
+func indexByID(cats []Category) map[string]Rule {
+	reg := make(map[string]Rule)
 	for _, cat := range cats {
 		for _, r := range cat.Rules {
 			reg[r.ID] = r

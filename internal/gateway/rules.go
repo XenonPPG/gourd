@@ -13,7 +13,7 @@ type CategoryDTO struct {
 }
 
 type RuleDTO struct {
-	ID               int    `json:"id,omitempty"`
+	ID               string `json:"id,omitempty"`
 	Name             string `json:"name,omitempty"`
 	Description      string `json:"description,omitempty"`
 	EnabledByDefault bool   `json:"enabled_by_default,omitempty"`
@@ -32,8 +32,8 @@ type RuleDTO struct {
 func (s *Service) ListRules(c fiber.Ctx) error {
 	fileType := common.FileType(c.Params("type"))
 
-	result := make([]CategoryDTO, 0, len(rule.Registry))
-	for _, rCat := range rule.Registry {
+	result := make([]CategoryDTO, 0, len(rule.Registry()))
+	for _, rCat := range rule.Registry() {
 		rules := make([]RuleDTO, 0, len(rCat.Rules))
 		for _, r := range rCat.Rules {
 			_, ok := r.Adapters[fileType]

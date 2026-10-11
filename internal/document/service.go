@@ -38,7 +38,7 @@ func NewDocument(filename string) (Document, error) {
 	}
 }
 
-func (s *Service) Process(in io.Reader, out io.Writer, ruleIDs []int, filename string) error {
+func (s *Service) Process(in io.Reader, out io.Writer, ruleIDs []string, filename string) error {
 	doc, err := NewDocument(filename)
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func (s *Service) Process(in io.Reader, out io.Writer, ruleIDs []int, filename s
 	for _, id := range ruleIDs {
 		r, ok := rule.QuickRegistry[id]
 		if !ok {
-			return fmt.Errorf("rule with id %d not found", id)
+			return fmt.Errorf("rule with id %s not found", id)
 		}
 		rules = append(rules, r)
 	}
@@ -69,7 +69,7 @@ func (s *Service) Process(in io.Reader, out io.Writer, ruleIDs []int, filename s
 	return nil
 }
 
-func (s *Service) ProcessRaw(text string, ruleIDs []int, fileType common.FileType) (string, error) {
+func (s *Service) ProcessRaw(text string, ruleIDs []string, fileType common.FileType) (string, error) {
 	if fileType != common.Text && fileType != common.Markdown {
 		return "", fmt.Errorf("unsupported file type: %v", fileType)
 	}
