@@ -1,8 +1,8 @@
 package gateway
 
 import (
+	"gourd/internal/common"
 	"gourd/internal/document/rule"
-	"gourd/internal/domain"
 
 	"github.com/gofiber/fiber/v3"
 )
@@ -30,7 +30,7 @@ type RuleDTO struct {
 //	@Failure		404		{object}	map[string]string		"Rule registry contains no categories (response body: {\"error\": \"no rules found for file type\"})"
 //	@Router			/rules/{type} [get]
 func (s *Service) ListRules(c fiber.Ctx) error {
-	fileType := domain.FileType(c.Params("type"))
+	fileType := common.FileType(c.Params("type"))
 
 	result := make([]CategoryDTO, 0, len(rule.Registry))
 	for _, rCat := range rule.Registry {

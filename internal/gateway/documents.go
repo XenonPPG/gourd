@@ -2,7 +2,7 @@ package gateway
 
 import (
 	"bytes"
-	"gourd/internal/domain"
+	"gourd/internal/common"
 	"mime/multipart"
 
 	"github.com/gofiber/fiber/v3"
@@ -72,7 +72,7 @@ func (s *Service) ProcessRaw(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	output, err := s.documentService.ProcessRaw(req.Text, req.Rules, domain.FileType(req.FileType))
+	output, err := s.documentService.ProcessRaw(req.Text, req.Rules, common.FileType(req.FileType))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}

@@ -4,9 +4,9 @@ import (
 	"archive/zip"
 	"bytes"
 	"fmt"
+	"gourd/internal/common"
 	"gourd/internal/constants"
 	"gourd/internal/document/rule"
-	"gourd/internal/domain"
 	"io"
 
 	"github.com/fumiama/go-docx"
@@ -48,7 +48,7 @@ func (d *DocxDocument) Write(out io.Writer) error {
 
 func (d *DocxDocument) Apply(rules []rule.Rule) error {
 	for _, r := range rules {
-		if err := r.Apply(d.document, domain.Docx); err != nil {
+		if err := r.Apply(d.document, common.Docx); err != nil {
 			return err
 		}
 	}

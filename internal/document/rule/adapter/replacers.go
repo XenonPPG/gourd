@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	"gourd/internal/domain"
+	"gourd/internal/common"
 	"gourd/internal/utils"
 	"strings"
 
@@ -68,9 +68,9 @@ func commonTextReplacer(templates []ReplacerTemplate, escapeMarkdown bool) AnyAd
 
 func NewReplacer(templates []ReplacerTemplate) AdaptersMap {
 	return AdaptersMap{
-		domain.Text:     commonTextReplacer(templates, false),
-		domain.Markdown: commonTextReplacer(templates, true),
-		domain.Docx:     docxReplacer(templates),
+		common.Text:     commonTextReplacer(templates, false),
+		common.Markdown: commonTextReplacer(templates, true),
+		common.Docx:     docxReplacer(templates),
 	}
 }
 

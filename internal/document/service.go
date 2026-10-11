@@ -2,10 +2,10 @@ package document
 
 import (
 	"fmt"
+	"gourd/internal/common"
 	"gourd/internal/counter"
 	"gourd/internal/document/document_instance"
 	"gourd/internal/document/rule"
-	"gourd/internal/domain"
 	"io"
 	"strings"
 )
@@ -18,20 +18,20 @@ func New(counterService *counter.Service) *Service {
 	return &Service{counterService: counterService}
 }
 
-func getFileType(filename string) domain.FileType {
+func getFileType(filename string) common.FileType {
 	parts := strings.Split(filename, ".")
-	return domain.FileType(parts[len(parts)-1])
+	return common.FileType(parts[len(parts)-1])
 }
 
 func NewDocument(filename string) (Document, error) {
 	fileType := getFileType(filename)
 
 	switch fileType {
-	case domain.Text:
+	case common.Text:
 		return &document_instance.CommonTextDocument{EscapeMarkdown: false}, nil
-	case domain.Markdown:
+	case common.Markdown:
 		return &document_instance.CommonTextDocument{EscapeMarkdown: true}, nil
-	case domain.Docx:
+	case common.Docx:
 		return &document_instance.DocxDocument{}, nil
 	default:
 		return nil, fmt.Errorf("unsupported file type: %v", fileType)
@@ -69,8 +69,8 @@ func (s *Service) Process(in io.Reader, out io.Writer, ruleIDs []int, filename s
 	return nil
 }
 
-func (s *Service) ProcessRaw(text string, ruleIDs []int, fileType domain.FileType) (string, error) {
-	if fileType != domain.Text && fileType != domain.Markdown {
+func (s *Service) ProcessRaw(text string, ruleIDs []int, fileType common.FileType) (string, error) {
+	if fileType != common.Text && fileType != common.Markdown {
 		return "", fmt.Errorf("unsupported file type: %v", fileType)
 	}
 

@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	"gourd/internal/domain"
+	"gourd/internal/common"
 	"slices"
 	"strings"
 
@@ -63,8 +63,8 @@ func docxLineEditor(effect effectFunc) AnyAdapter {
 
 func NewLineEditor(effect effectFunc) AdaptersMap {
 	return AdaptersMap{
-		domain.Text:     commonTextLineEditor(effect),
-		domain.Markdown: commonTextLineEditor(effect),
-		domain.Docx:     docxLineEditor(effect),
+		common.Text:     commonTextLineEditor(effect),
+		common.Markdown: commonTextLineEditor(effect),
+		common.Docx:     docxLineEditor(effect),
 	}
 }

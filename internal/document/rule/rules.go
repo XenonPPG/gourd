@@ -3,8 +3,8 @@ package rule
 import (
 	"errors"
 	"fmt"
+	"gourd/internal/common"
 	"gourd/internal/document/rule/adapter"
-	"gourd/internal/domain"
 	"strings"
 )
 
@@ -104,7 +104,7 @@ func indexByID(cats []Category) map[int]Rule {
 	return reg
 }
 
-func (r Rule) Apply(doc any, fileType domain.FileType) error {
+func (r Rule) Apply(doc any, fileType common.FileType) error {
 	a, ok := r.Adapters[fileType]
 	if !ok {
 		return errors.New(fmt.Sprintf("adapter for %s not found", fileType))

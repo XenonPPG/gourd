@@ -1,8 +1,8 @@
 package document_instance
 
 import (
+	"gourd/internal/common"
 	"gourd/internal/document/rule"
-	"gourd/internal/domain"
 	"gourd/internal/utils"
 	"io"
 )
@@ -22,7 +22,7 @@ func (doc *CommonTextDocument) Read(in io.Reader) error {
 }
 
 func (doc *CommonTextDocument) Apply(rules []rule.Rule) error {
-	fileType := utils.Ternary(doc.EscapeMarkdown, domain.Markdown, domain.Text)
+	fileType := utils.Ternary(doc.EscapeMarkdown, common.Markdown, common.Text)
 
 	for _, r := range rules {
 		err := r.Apply(&doc.content, fileType)
