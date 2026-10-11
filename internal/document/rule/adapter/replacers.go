@@ -2,7 +2,6 @@ package adapter
 
 import (
 	"gourd/internal/common"
-	"gourd/internal/utils"
 	"strings"
 
 	"github.com/fumiama/go-docx"
@@ -50,7 +49,7 @@ func commonTextReplacer(templates []ReplacerTemplate, escapeMarkdown bool) AnyAd
 		for _, template := range templates {
 			var newStr string
 			if escapeMarkdown {
-				newStr = utils.EscapeMarkdownV2(template.NewStr)
+				newStr = common.EscapeMarkdownV2(template.NewStr)
 			} else {
 				newStr = template.NewStr
 			}

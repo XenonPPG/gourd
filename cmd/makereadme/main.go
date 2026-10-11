@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"gourd/internal/common"
 	"gourd/internal/document/rule"
-	"gourd/internal/utils"
 	"log"
 	"os"
 	"strings"
@@ -16,7 +16,7 @@ func main() {
 		for _, r := range cat.Rules {
 			text.WriteString(fmt.Sprintf(
 				"- %s: `%s`\n",
-				utils.EscapeMarkdownV2(r.Name),
+				common.EscapeMarkdownV2(r.Name),
 				r.Description,
 			))
 		}
