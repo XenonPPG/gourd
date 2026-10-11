@@ -18,11 +18,10 @@ type Service struct {
 	workerPool     *workerpool.Pool[*string]
 }
 
-func New(counterService *counter.Service) *Service {
-	// TODO: put the worker pool into env
+func New(workerCount int, counterService *counter.Service) *Service {
 	return &Service{
 		counterService: counterService,
-		workerPool:     workerpool.New[*string](10),
+		workerPool:     workerpool.New[*string](workerCount),
 	}
 }
 

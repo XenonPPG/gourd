@@ -1,6 +1,8 @@
 # Stage 1: Build
 FROM golang:1.27-alpine AS builder
 
+COPY config.yaml /config.yaml
+
 RUN apk add --no-cache git
 
 WORKDIR /build
@@ -18,6 +20,7 @@ FROM alpine:3.20
 WORKDIR /root/
 
 COPY --from=builder /main .
+COPY --from=builder /config.yaml .
 
 EXPOSE 3000
 

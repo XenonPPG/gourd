@@ -5,6 +5,7 @@ go 1.27
 require (
 	github.com/fumiama/go-docx v0.0.0-20250506085032-0c30fd09304b
 	github.com/gofiber/fiber/v3 v3.5.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
