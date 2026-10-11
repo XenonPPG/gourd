@@ -1,21 +1,35 @@
 package document
 
 import (
+	"context"
 	"fmt"
 	"gourd/internal/common"
 	"gourd/internal/counter"
 	"gourd/internal/document/document_instance"
 	"gourd/internal/document/rule"
+	"gourd/internal/workerpool"
 	"io"
 	"strings"
+	"time"
 )
 
 type Service struct {
 	counterService *counter.Service
+	workerPool     *workerpool.Pool[*string]
 }
 
 func New(counterService *counter.Service) *Service {
-	return &Service{counterService: counterService}
+	// TODO: put the worker pool into env
+	return &Service{
+		counterService: counterService,
+		workerPool:     workerpool.New[*string](10),
+	}
+}
+
+func (s *Service) Shutdown(timeout time.Duration) error {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	return s.workerPool.Stop(ctx)
 }
 
 func getFileType(filename string) common.FileType {
@@ -38,44 +52,48 @@ func NewDocument(filename string) (Document, error) {
 	}
 }
 
-func (s *Service) Process(in io.Reader, out io.Writer, ruleIDs []string, filename string) error {
-	doc, err := NewDocument(filename)
-	if err != nil {
-		return err
-	}
-	rules := make([]rule.Rule, 0, len(ruleIDs))
-	for _, id := range ruleIDs {
-		r, ok := rule.QuickRegistry[id]
-		if !ok {
-			return fmt.Errorf("rule with id %s not found", id)
+func (s *Service) Process(ctx context.Context, in io.Reader, out io.Writer, ruleIDs []string, filename string) error {
+	_, err := s.workerPool.Do(ctx, func(fnCtx context.Context) (*string, error) {
+		doc, err := NewDocument(filename)
+		if err != nil {
+			return nil, err
 		}
-		rules = append(rules, r)
-	}
+		rules := make([]rule.Rule, 0, len(ruleIDs))
+		for _, id := range ruleIDs {
+			r, ok := rule.QuickRegistry[id]
+			if !ok {
+				return nil, fmt.Errorf("rule with id %s not found", id)
+			}
+			rules = append(rules, r)
+		}
 
-	if err = doc.Read(in); err != nil {
-		return fmt.Errorf("read: %w", err)
-	}
+		if err = doc.Read(in); err != nil {
+			return nil, fmt.Errorf("read: %w", err)
+		}
 
-	if err = doc.Apply(rules); err != nil {
-		return fmt.Errorf("apply: %w", err)
-	}
+		if err = doc.Apply(rules); err != nil {
+			return nil, fmt.Errorf("apply: %w", err)
+		}
 
-	if err = doc.Write(out); err != nil {
-		return fmt.Errorf("write: %w", err)
-	}
+		if err = doc.Write(out); err != nil {
+			return nil, fmt.Errorf("write: %w", err)
+		}
 
-	s.counterService.Increment()
+		s.counterService.Increment()
 
-	return nil
+		return nil, nil
+	})
+
+	return err
 }
 
-func (s *Service) ProcessRaw(text string, ruleIDs []string, fileType common.FileType) (string, error) {
+func (s *Service) ProcessRaw(ctx context.Context, text string, ruleIDs []string, fileType common.FileType) (string, error) {
 	if fileType != common.Text && fileType != common.Markdown {
 		return "", fmt.Errorf("unsupported file type: %v", fileType)
 	}
 
 	var buf strings.Builder
-	err := s.Process(strings.NewReader(text), &buf, ruleIDs, string(fileType))
+	err := s.Process(ctx, strings.NewReader(text), &buf, ruleIDs, string(fileType))
 	if err != nil {
 		return "", err
 	}

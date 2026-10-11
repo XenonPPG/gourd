@@ -66,7 +66,7 @@ func (s *Service) Start(addr string) error {
 	return s.app.Listen(addr)
 }
 
-func (s *Service) ShutdownWithTimeout(timeout time.Duration) error {
+func (s *Service) Shutdown(timeout time.Duration) error {
 	return s.app.ShutdownWithTimeout(timeout)
 }
 

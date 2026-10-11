@@ -15,6 +15,7 @@ import (
 	"gourd/internal/gateway"
 )
 
+// TODO: move this to env
 const (
 	listenAddr      = ":3000"
 	shutdownTimeout = 10 * time.Second
@@ -65,12 +66,17 @@ func run() error {
 		stop()
 		log.Printf("shutdown signal received, waiting up to %s for active requests", shutdownTimeout)
 
-		if err := gatewayService.ShutdownWithTimeout(shutdownTimeout); err != nil {
+		if err := gatewayService.Shutdown(shutdownTimeout); err != nil {
 			log.Printf("server shutdown error: %v", err)
 			runErr = fmt.Errorf("server shutdown: %w", err)
 		} else {
 			log.Println("server stopped gracefully")
 		}
+	}
+
+	log.Println("stopping document service...")
+	if err := documentService.Shutdown(shutdownTimeout); err != nil {
+		log.Println("failed to stop document service: ", err)
 	}
 
 	log.Println("saving counter...")

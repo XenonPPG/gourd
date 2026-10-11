@@ -3,6 +3,7 @@ package gateway
 import (
 	"bytes"
 	"gourd/internal/common"
+	"log"
 	"mime/multipart"
 
 	"github.com/gofiber/fiber/v3"
@@ -36,10 +37,14 @@ func (s *Service) ProcessFile(c fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-	defer src.Close()
+	defer func(f multipart.File) {
+		if cErr := f.Close(); cErr != nil {
+			log.Println("failed to close file: ", cErr)
+		}
+	}(src)
 
 	var buf bytes.Buffer
-	if err = s.documentService.Process(src, &buf, req.Rules, req.File.Filename); err != nil {
+	if err = s.documentService.Process(c.Context(), src, &buf, req.Rules, req.File.Filename); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -72,7 +77,7 @@ func (s *Service) ProcessRaw(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	output, err := s.documentService.ProcessRaw(req.Text, req.Rules, common.FileType(req.FileType))
+	output, err := s.documentService.ProcessRaw(c.Context(), req.Text, req.Rules, common.FileType(req.FileType))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
