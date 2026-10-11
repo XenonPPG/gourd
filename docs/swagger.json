@@ -230,7 +230,7 @@
                 "rules": {
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "type": "string"
                     }
                 },
                 "text": {
@@ -251,7 +251,7 @@
                     "type": "boolean"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
