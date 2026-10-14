@@ -33,6 +33,18 @@ var categories = []Category{
 				EnabledByDefault: true,
 			},
 			{
+				ID:          "replace-all-dashes",
+				Name:        "Заменить все тире",
+				Description: "Заменяет все тире на знак минуса",
+				Adapters: adapter.NewReplacer(
+					[]adapter.ReplacerTemplate{
+						{OldStr: "—", NewStr: "-"},
+						{OldStr: "–", NewStr: "-"},
+					},
+				),
+				EnabledByDefault: true,
+			},
+			{
 				ID:               "replace-multiplication",
 				Name:             "Заменить умножение",
 				Description:      "Заменяет × на *",
