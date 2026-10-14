@@ -23,7 +23,7 @@ type Category struct {
 
 var categories = []Category{
 	{
-		Name: "Рекомендованное",
+		Name: "Рекомендации",
 		Rules: []Rule{
 			{
 				ID:          "replace-all-dashes",
