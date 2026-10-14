@@ -45,7 +45,7 @@ func (s *Service) setupRoutes() {
 	}))
 
 	s.app.Get("/health", s.Health)
-	s.app.Get("/rules/:type", s.ListRules)
+	s.app.Get("/rules", s.ListRules)
 	s.app.Get("/counter", s.GetCounterValue)
 
 	heavyLimiter := limiter.New(limiter.Config{

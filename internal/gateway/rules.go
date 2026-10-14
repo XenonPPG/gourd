@@ -1,8 +1,8 @@
 package gateway
 
 import (
-	"gourd/internal/common"
 	"gourd/internal/document/rule"
+	"slices"
 
 	"github.com/gofiber/fiber/v3"
 )
@@ -13,31 +13,41 @@ type CategoryDTO struct {
 }
 
 type RuleDTO struct {
-	ID               string `json:"id,omitempty"`
-	Name             string `json:"name,omitempty"`
-	Description      string `json:"description,omitempty"`
-	EnabledByDefault bool   `json:"enabled_by_default,omitempty"`
+	ID               string   `json:"id,omitempty"`
+	Name             string   `json:"name,omitempty"`
+	Description      string   `json:"description,omitempty"`
+	EnabledByDefault bool     `json:"enabled_by_default,omitempty"`
+	AvailableFormats []string `json:"available_formats,omitempty"`
 }
 
-// ListRules returns processing rules available for the given file type, grouped by category.
+// ListRules returns processing rules grouped by category, optionally filtered by file type.
 //
-//	@Summary		List available rules for a file type
-//	@Description	Returns the registry of document processing rules grouped by category, filtered by the file type from the path. Each category contains its name and a list of rules; each rule has an id, name, description and default enabled state. Only rules that have an adapter for the requested file type are included. Categories without applicable rules are still returned, with an empty rules list.
+//	@Summary		List available rules
+//	@Description	Returns the registry of document processing rules grouped by category.
+//	@Description	If the optional `filter` query parameter is provided, only rules that have an adapter for that file type are included; otherwise all rules are returned.
+//	@Description	Each category contains its name and a list of rules; each rule has an id, name, description, default enabled state and the list of file formats it is available for.
+//	@Description	Categories without applicable rules are omitted from the response.
+//	@Description	If no rules are found (the registry is empty or nothing matches the filter), the endpoint responds with 400.
 //	@Tags			rules
 //	@Produce		json
-//	@Param			type	path		string					true	"File type the rules are requested for"
-//	@Success		200		{array}		CategoryDTO				"List of rule categories with their rules"
-//	@Failure		404		{object}	map[string]string		"Rule registry contains no categories (response body: {\"error\": \"no rules found for file type\"})"
-//	@Router			/rules/{type} [get]
+//	@Param			filter	query		string				false	"File type to filter rules by (only rules with an adapter for this type are returned)"
+//	@Success		200		{array}		CategoryDTO			"List of rule categories with their rules"
+//	@Failure		400		{object}	map[string]string	"No rules found for the given filter (response body: {\"error\": \"no rules found for file type\"})"
+//	@Router			/rules [get]
 func (s *Service) ListRules(c fiber.Ctx) error {
-	fileType := common.FileType(c.Params("type"))
+	filter := c.Query("filter")
 
 	result := make([]CategoryDTO, 0, len(rule.Registry()))
 	for _, rCat := range rule.Registry() {
 		rules := make([]RuleDTO, 0, len(rCat.Rules))
 		for _, r := range rCat.Rules {
-			_, ok := r.Adapters[fileType]
-			if !ok {
+			availableFileTypes := r.Adapters.AvailableAdapters()
+			available := make([]string, 0, len(availableFileTypes))
+			for _, t := range availableFileTypes {
+				available = append(available, string(t))
+			}
+
+			if filter != "" && !slices.Contains(available, filter) {
 				continue
 			}
 
@@ -46,6 +56,7 @@ func (s *Service) ListRules(c fiber.Ctx) error {
 				Name:             r.Name,
 				Description:      r.Description,
 				EnabledByDefault: r.EnabledByDefault,
+				AvailableFormats: available,
 			})
 		}
 		if len(rules) == 0 {

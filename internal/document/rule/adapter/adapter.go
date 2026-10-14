@@ -3,6 +3,8 @@ package adapter
 import (
 	"fmt"
 	"gourd/internal/common"
+	"maps"
+	"slices"
 )
 
 type AnyAdapter interface {
@@ -27,3 +29,7 @@ func Wrap[T any](fn Effect[T]) AnyAdapter {
 }
 
 type AdaptersMap map[common.FileType]AnyAdapter
+
+func (m AdaptersMap) AvailableAdapters() []common.FileType {
+	return slices.Collect(maps.Keys(m))
+}

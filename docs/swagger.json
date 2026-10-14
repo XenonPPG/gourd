@@ -167,23 +167,22 @@
                 }
             }
         },
-        "/rules/{type}": {
+        "/rules": {
             "get": {
-                "description": "Returns the registry of document processing rules grouped by category, filtered by the file type from the path. Each category contains its name and a list of rules; each rule has an id, name, description and default enabled state. Only rules that have an adapter for the requested file type are included. Categories without applicable rules are still returned, with an empty rules list.",
+                "description": "Returns the registry of document processing rules grouped by category.\nIf the optional `filter` query parameter is provided, only rules that have an adapter for that file type are included; otherwise all rules are returned.\nEach category contains its name and a list of rules; each rule has an id, name, description, default enabled state and the list of file formats it is available for.\nCategories without applicable rules are omitted from the response.\nIf no rules are found (the registry is empty or nothing matches the filter), the endpoint responds with 400.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "rules"
                 ],
-                "summary": "List available rules for a file type",
+                "summary": "List available rules",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "File type the rules are requested for",
-                        "name": "type",
-                        "in": "path",
-                        "required": true
+                        "description": "File type to filter rules by (only rules with an adapter for this type are returned)",
+                        "name": "filter",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -196,8 +195,8 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Rule registry contains no categories (response body: {\\\"error\\\": \\\"no rules found for file type\\\"})",
+                    "400": {
+                        "description": "No rules found for the given filter (response body: {\\\"error\\\": \\\"no rules found for file type\\\"})",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -244,6 +243,12 @@
         "gateway.RuleDTO": {
             "type": "object",
             "properties": {
+                "available_formats": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "description": {
                     "type": "string"
                 },
