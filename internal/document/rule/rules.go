@@ -26,13 +26,6 @@ var categories = []Category{
 		Name: "Рекомендованное",
 		Rules: []Rule{
 			{
-				ID:               "replace-en-dash",
-				Name:             "Заменить тире",
-				Description:      "Заменяет — на –",
-				Adapters:         adapter.NewSimpleReplacer("—", "–"),
-				EnabledByDefault: true,
-			},
-			{
 				ID:          "replace-all-dashes",
 				Name:        "Заменить все тире",
 				Description: "Заменяет все тире на знак минуса",
@@ -43,6 +36,12 @@ var categories = []Category{
 					},
 				),
 				EnabledByDefault: true,
+			},
+			{
+				ID:          "replace-en-dash",
+				Name:        "Заменить тире",
+				Description: "Заменяет — на –",
+				Adapters:    adapter.NewSimpleReplacer("—", "–"),
 			},
 			{
 				ID:               "replace-multiplication",
