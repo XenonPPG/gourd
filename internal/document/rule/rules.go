@@ -39,7 +39,7 @@ var categories = []Category{
 			},
 			{
 				ID:          "replace-en-dash",
-				Name:        "Заменить тире",
+				Name:        "Заменить длинное тире",
 				Description: "Заменяет — на –",
 				Adapters:    adapter.NewSimpleReplacer("—", "–"),
 			},
