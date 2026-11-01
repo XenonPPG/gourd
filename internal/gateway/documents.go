@@ -21,8 +21,8 @@ type ProcessDocumentRequest struct {
 //	@Tags			documents
 //	@Accept			multipart/form-data
 //	@Produce		application/octet-stream
-//	@Param			file	formData	file	true	"Document file to process"
-//	@Param			rule	formData	[]int	false	"List of rule IDs to apply"	collectionFormat(multi)
+//	@Param			file	formData	file		true	"Document file to process"
+//	@Param			rule	formData	[]string	false	"List of rule IDs to apply"	collectionFormat(multi)
 //	@Success		200		{file}		file				"Processed document"
 //	@Failure		400		{object}	map[string]string	"Invalid request body"
 //	@Failure		500		{object}	map[string]string	"File processing error"

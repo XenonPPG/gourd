@@ -56,7 +56,7 @@
                     {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "string"
                         },
                         "collectionFormat": "multi",
                         "description": "List of rule IDs to apply",
