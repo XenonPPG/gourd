@@ -31,14 +31,7 @@ func (s *Service) Shutdown(timeout time.Duration) error {
 	return s.workerPool.Stop(ctx)
 }
 
-func getFileType(filename string) common.FileType {
-	parts := strings.Split(filename, ".")
-	return common.FileType(parts[len(parts)-1])
-}
-
-func NewDocument(filename string) (Document, error) {
-	fileType := getFileType(filename)
-
+func NewDocument(fileType common.FileType) (Document, error) {
 	switch fileType {
 	case common.Text:
 		return &document_instance.CommonTextDocument{EscapeMarkdown: false}, nil
@@ -51,9 +44,9 @@ func NewDocument(filename string) (Document, error) {
 	}
 }
 
-func (s *Service) Process(ctx context.Context, in io.Reader, out io.Writer, ruleIDs []string, filename string) error {
+func (s *Service) Process(ctx context.Context, in io.Reader, out io.Writer, fileType common.FileType, ruleIDs []string) error {
 	_, err := s.workerPool.Do(ctx, func(fnCtx context.Context) (*string, error) {
-		doc, err := NewDocument(filename)
+		doc, err := NewDocument(fileType)
 		if err != nil {
 			return nil, err
 		}
@@ -92,7 +85,7 @@ func (s *Service) ProcessRaw(ctx context.Context, text string, ruleIDs []string,
 	}
 
 	var buf strings.Builder
-	err := s.Process(ctx, strings.NewReader(text), &buf, ruleIDs, string(fileType))
+	err := s.Process(ctx, strings.NewReader(text), &buf, fileType, ruleIDs)
 	if err != nil {
 		return "", err
 	}

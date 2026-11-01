@@ -34,7 +34,7 @@
         },
         "/documents/file": {
             "post": {
-                "description": "Uploads a document file and applies the specified processing rules to it, returning the processed binary content",
+                "description": "Uploads a document file and applies the specified processing rules to it, returning the processed binary content. The file type must be given in the fileType field.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -50,6 +50,13 @@
                         "type": "file",
                         "description": "Document file to process",
                         "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Type of the uploaded document",
+                        "name": "fileType",
                         "in": "formData",
                         "required": true
                     },
@@ -81,7 +88,7 @@
                         }
                     },
                     "500": {
-                        "description": "File processing error",
+                        "description": "File read or processing error (including unsupported file type)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -94,7 +101,7 @@
         },
         "/documents/raw": {
             "post": {
-                "description": "Applies the specified processing rules to raw text content of a given file type and returns the processed output. Currently only \"markdown\" is supported as a file type",
+                "description": "Applies the specified processing rules to raw text content of a given file type and returns the processed output in the \"output\" field. Currently only \"markdown\" is supported as a file type.",
                 "consumes": [
                     "application/json"
                 ],
@@ -118,7 +125,7 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Unsupported file type",
+                        "description": "Processed output, returned as {\\\"output\\\": \\\"...\\\"}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -136,7 +143,7 @@
                         }
                     },
                     "500": {
-                        "description": "Processing error",
+                        "description": "Processing error (including unsupported file type)",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
