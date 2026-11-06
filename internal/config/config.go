@@ -15,6 +15,8 @@ type Config struct {
 	DocumentService struct {
 		WorkerCount int `yaml:"worker-count"`
 	} `yaml:"document-service"`
+
+	DevMode bool `yaml:"-"`
 }
 
 func Load(path string) (Config, error) {
@@ -28,5 +30,8 @@ func Load(path string) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+
+	config.DevMode = os.Getenv("DEV_MODE") == "true"
+
 	return config, nil
 }

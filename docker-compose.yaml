@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      DEV_MODE: ${DEV_MODE:-false}
     container_name: gourd
     ports:
       - "3000:3000"

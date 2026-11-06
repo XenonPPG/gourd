@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"gourd/internal/config"
 	"time"
 
 	"gourd/internal/counter"
@@ -15,13 +16,15 @@ type Service struct {
 	app             *fiber.App
 	documentService *document.Service
 	counterService  *counter.Service
+	config          config.Config
 }
 
-func New(documentService *document.Service, counterService *counter.Service) *Service {
+func New(documentService *document.Service, counterService *counter.Service, config config.Config) *Service {
 	s := &Service{
 		app:             fiber.New(),
 		documentService: documentService,
 		counterService:  counterService,
+		config:          config,
 	}
 
 	s.setupRoutes()
@@ -36,13 +39,15 @@ func (s *Service) setupRoutes() {
 		AllowCredentials: false,
 	}))
 
-	s.app.Use(limiter.New(limiter.Config{
-		Max:        100,
-		Expiration: time.Minute,
-		LimitReached: func(c fiber.Ctx) error {
-			return c.SendStatus(fiber.StatusTooManyRequests)
-		},
-	}))
+	if !s.config.DevMode {
+		s.app.Use(limiter.New(limiter.Config{
+			Max:        100,
+			Expiration: time.Minute,
+			LimitReached: func(c fiber.Ctx) error {
+				return c.SendStatus(fiber.StatusTooManyRequests)
+			},
+		}))
+	}
 
 	s.app.Get("/health", s.Health)
 	s.app.Get("/rules", s.ListRules)
@@ -58,8 +63,11 @@ func (s *Service) setupRoutes() {
 	})
 
 	docs := s.app.Group("/documents")
-	docs.Post("/file", heavyLimiter, s.ProcessFile)
-	docs.Post("/raw", heavyLimiter, s.ProcessRaw)
+	if !s.config.DevMode {
+		docs.Use(heavyLimiter)
+	}
+	docs.Post("/file", s.ProcessFile)
+	docs.Post("/raw", s.ProcessRaw)
 }
 
 func (s *Service) Start(addr string) error {

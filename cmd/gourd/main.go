@@ -36,6 +36,9 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("init config: %w", err)
 	}
+	if cfg.DevMode {
+		log.Println("!!! DEVELOPER MODE ENABLED !!!")
+	}
 
 	// counter service
 	counterService, err := counter.New()
@@ -46,7 +49,7 @@ func run() error {
 
 	// services
 	documentService := document.New(cfg.DocumentService.WorkerCount, counterService)
-	gatewayService := gateway.New(documentService, counterService)
+	gatewayService := gateway.New(documentService, counterService, cfg)
 
 	serverErr := make(chan error, 1)
 	go func() {
