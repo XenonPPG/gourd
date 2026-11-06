@@ -67,7 +67,7 @@
                         },
                         "collectionFormat": "multi",
                         "description": "List of rule IDs to apply",
-                        "name": "rule",
+                        "name": "rules",
                         "in": "formData"
                     }
                 ],

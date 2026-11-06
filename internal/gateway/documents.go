@@ -12,7 +12,7 @@ import (
 // ProcessDocumentRequest is the multipart form body for ProcessFile.
 type ProcessDocumentRequest struct {
 	File     *multipart.FileHeader `form:"file"`
-	Rules    []string              `form:"rule"`
+	Rules    []string              `form:"rules"`
 	FileType string                `form:"fileType"`
 }
 
@@ -25,7 +25,7 @@ type ProcessDocumentRequest struct {
 //	@Produce       application/octet-stream
 //	@Param         file      formData  file      true   "Document file to process"
 //	@Param         fileType  formData  string    true   "Type of the uploaded document"
-//	@Param         rule      formData  []string  false  "List of rule IDs to apply"  collectionFormat(multi)
+//	@Param         rules     formData  []string  false  "List of rule IDs to apply"  collectionFormat(multi)
 //	@Success       200       {file}    file                "Processed document"
 //	@Failure       400       {object}  map[string]string   "Invalid request body"
 //	@Failure       500       {object}  map[string]string   "File read or processing error (including unsupported file type)"
