@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"gourd/internal/config"
+	"gourd/internal/constants"
 	"time"
 
 	"gourd/internal/counter"
@@ -20,8 +21,12 @@ type Service struct {
 }
 
 func New(documentService *document.Service, counterService *counter.Service, config config.Config) *Service {
+	fiberApp := fiber.New(fiber.Config{
+		BodyLimit: constants.MaxTotalSize,
+	})
+
 	s := &Service{
-		app:             fiber.New(),
+		app:             fiberApp,
 		documentService: documentService,
 		counterService:  counterService,
 		config:          config,

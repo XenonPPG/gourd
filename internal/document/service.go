@@ -50,6 +50,7 @@ func (s *Service) Process(ctx context.Context, in io.Reader, out io.Writer, file
 		if err != nil {
 			return nil, err
 		}
+
 		rules := make([]rule.Rule, 0, len(ruleIDs))
 		for _, id := range ruleIDs {
 			r, ok := rule.QuickRegistry[id]
