@@ -34,7 +34,7 @@
         },
         "/documents/file": {
             "post": {
-                "description": "Uploads a document file and applies the specified processing rules to it, returning the processed binary content. The file type must be given in the fileType field.",
+                "description": "Uploads a document file and applies the specified processing rules to it, returning the processed binary content.\nThe file type must be given in the file_type field.\nProcessing metadata is returned in the X-Process-Meta response header: a base64-encoded JSON object, e.g. {\"file_type\":\"docx\"}.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -56,7 +56,7 @@
                     {
                         "type": "string",
                         "description": "Type of the uploaded document",
-                        "name": "fileType",
+                        "name": "file_type",
                         "in": "formData",
                         "required": true
                     },
@@ -76,6 +76,12 @@
                         "description": "Processed document",
                         "schema": {
                             "type": "file"
+                        },
+                        "headers": {
+                            "X-Process-Meta": {
+                                "type": "string",
+                                "description": "Base64-encoded JSON with processing metadata (file_type)"
+                            }
                         }
                     },
                     "400": {
