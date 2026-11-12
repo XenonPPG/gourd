@@ -29,16 +29,17 @@ type ProcessDocumentResponseMeta struct {
 //	@Summary       Process a document file
 //	@Description   Uploads a document file and applies the specified processing rules to it, returning the processed binary content.
 //	@Description   The file type must be given in the file_type field.
+//	@Description   At least one rule must be specified in the rules field.
 //	@Description   Processing metadata is returned in the X-Process-Meta response header: a base64-encoded JSON object, e.g. {"file_type":"docx"}.
 //	@Tags          documents
 //	@Accept        multipart/form-data
 //	@Produce       application/octet-stream
 //	@Param         file       formData  file      true   "Document file to process"
 //	@Param         file_type  formData  string    true   "Type of the uploaded document"
-//	@Param         rules      formData  []string  false  "List of rule IDs to apply"  collectionFormat(multi)
+//	@Param         rules      formData  []string  true   "List of rule IDs to apply (at least one required)"  collectionFormat(multi)
 //	@Success       200        {file}    file                "Processed document"
 //	@Header        200        {string}  X-Process-Meta      "Base64-encoded JSON with processing metadata (file_type)"
-//	@Failure       400        {object}  map[string]string   "Invalid request body"
+//	@Failure       400        {object}  map[string]string   "Invalid request body or no rules specified"
 //	@Failure       500        {object}  map[string]string   "File read or processing error (including unsupported file type)"
 //	@Router        /documents/file [post]
 func (s *Service) ProcessFile(c fiber.Ctx) error {
@@ -46,6 +47,9 @@ func (s *Service) ProcessFile(c fiber.Ctx) error {
 	req := new(ProcessDocumentRequest)
 	if err := c.Bind().Body(req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+	if len(req.Rules) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "no rules"})
 	}
 
 	// read file
@@ -81,7 +85,7 @@ func (s *Service) ProcessFile(c fiber.Ctx) error {
 // ProcessRawRequest is the JSON body for ProcessRaw.
 type ProcessRawRequest struct {
 	Text     string   `json:"text,omitempty"`
-	FileType string   `json:"type,omitempty"`
+	FileType string   `json:"type,omitempty" binding:"required"`
 	Rules    []string `json:"rules,omitempty"`
 }
 
@@ -89,18 +93,22 @@ type ProcessRawRequest struct {
 //
 //	@Summary      Process raw text content
 //	@Description  Applies the specified processing rules to raw text content of a given file type and returns the processed output in the "output" field. Currently only "markdown" is supported as a file type.
+//	@Description  At least one rule must be specified in the rules field.
 //	@Tags         documents
 //	@Accept       json
 //	@Produce      json
-//	@Param        request  body      ProcessRawRequest  true  "Raw content, file type and rules to apply"
+//	@Param        request  body      ProcessRawRequest  true  "Raw content, file type and rules to apply (rules must not be empty)"
 //	@Success      201      {object}  map[string]string        "Processed output, returned as {\"output\": \"...\"}"
-//	@Failure      400      {object}  map[string]string        "Invalid request body"
+//	@Failure      400      {object}  map[string]string        "Invalid request body or no rules specified"
 //	@Failure      500      {object}  map[string]string        "Processing error (including unsupported file type)"
 //	@Router       /documents/raw [post]
 func (s *Service) ProcessRaw(c fiber.Ctx) error {
 	req := new(ProcessRawRequest)
 	if err := c.Bind().Body(req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+	if len(req.Rules) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "no rules"})
 	}
 
 	output, err := s.documentService.ProcessRaw(c.Context(), req.Text, req.Rules, common.FileType(req.FileType))

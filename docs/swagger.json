@@ -34,7 +34,7 @@
         },
         "/documents/file": {
             "post": {
-                "description": "Uploads a document file and applies the specified processing rules to it, returning the processed binary content.\nThe file type must be given in the file_type field.\nProcessing metadata is returned in the X-Process-Meta response header: a base64-encoded JSON object, e.g. {\"file_type\":\"docx\"}.",
+                "description": "Uploads a document file and applies the specified processing rules to it, returning the processed binary content.\nThe file type must be given in the file_type field.\nAt least one rule must be specified in the rules field.\nProcessing metadata is returned in the X-Process-Meta response header: a base64-encoded JSON object, e.g. {\"file_type\":\"docx\"}.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -66,9 +66,10 @@
                             "type": "string"
                         },
                         "collectionFormat": "multi",
-                        "description": "List of rule IDs to apply",
+                        "description": "List of rule IDs to apply (at least one required)",
                         "name": "rules",
-                        "in": "formData"
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -85,7 +86,7 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid request body",
+                        "description": "Invalid request body or no rules specified",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -107,7 +108,7 @@
         },
         "/documents/raw": {
             "post": {
-                "description": "Applies the specified processing rules to raw text content of a given file type and returns the processed output in the \"output\" field. Currently only \"markdown\" is supported as a file type.",
+                "description": "Applies the specified processing rules to raw text content of a given file type and returns the processed output in the \"output\" field. Currently only \"markdown\" is supported as a file type.\nAt least one rule must be specified in the rules field.",
                 "consumes": [
                     "application/json"
                 ],
@@ -120,7 +121,7 @@
                 "summary": "Process raw text content",
                 "parameters": [
                     {
-                        "description": "Raw content, file type and rules to apply",
+                        "description": "Raw content, file type and rules to apply (rules must not be empty)",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -140,7 +141,7 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid request body",
+                        "description": "Invalid request body or no rules specified",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -238,6 +239,9 @@
         },
         "gateway.ProcessRawRequest": {
             "type": "object",
+            "required": [
+                "type"
+            ],
             "properties": {
                 "rules": {
                     "type": "array",
