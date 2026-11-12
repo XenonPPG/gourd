@@ -24,6 +24,8 @@ type ProcessDocumentResponseMeta struct {
 	FileType string `json:"file_type"`
 }
 
+const xProcessMeta = "X-Process-Meta"
+
 // ProcessFile processes an uploaded document file
 //
 //	@Summary       Process a document file
@@ -77,7 +79,7 @@ func (s *Service) ProcessFile(c fiber.Ctx) error {
 	}
 
 	c.Set(fiber.HeaderContentType, "application/octet-stream")
-	c.Set("X-Process-Meta", base64.StdEncoding.EncodeToString(headerMeta))
+	c.Set(xProcessMeta, base64.StdEncoding.EncodeToString(headerMeta))
 
 	return c.Send(buf.Bytes())
 }

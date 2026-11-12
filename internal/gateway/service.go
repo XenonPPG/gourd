@@ -41,6 +41,7 @@ func (s *Service) setupRoutes() {
 		AllowOrigins:     []string{"http://localhost:5173"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{xProcessMeta},
 		AllowCredentials: false,
 	}))
 
