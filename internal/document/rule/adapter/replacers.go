@@ -2,17 +2,47 @@ package adapter
 
 import (
 	"gourd/internal/common"
+	"sort"
 	"strings"
 
 	"github.com/fumiama/go-docx"
 )
 
-type ReplacerTemplate struct {
-	OldStr string
-	NewStr string
+type ReplacerTemplate map[string]string
+
+type replacePair struct {
+	oldStr string
+	newStr string
 }
 
-func docxReplacer(templates []ReplacerTemplate) AnyAdapter {
+func makePairs(template ReplacerTemplate, escapeMarkdown bool) []replacePair {
+	keys := make([]string, 0, len(template))
+	for oldStr := range template {
+		keys = append(keys, oldStr)
+	}
+	sort.Strings(keys)
+
+	pairs := make([]replacePair, 0, len(keys))
+	for _, oldStr := range keys {
+		newStr := template[oldStr]
+		if escapeMarkdown {
+			newStr = common.EscapeMarkdownV2(newStr)
+		}
+		pairs = append(pairs, replacePair{oldStr: oldStr, newStr: newStr})
+	}
+	return pairs
+}
+
+func replaceAll(s string, pairs []replacePair) string {
+	for _, p := range pairs {
+		s = strings.ReplaceAll(s, p.oldStr, p.newStr)
+	}
+	return s
+}
+
+func docxReplacer(template ReplacerTemplate) AnyAdapter {
+	pairs := makePairs(template, false)
+
 	return Wrap(func(document *docx.Docx) error {
 		for _, item := range document.Document.Body.Items {
 			para, ok := item.(*docx.Paragraph)
@@ -29,14 +59,7 @@ func docxReplacer(templates []ReplacerTemplate) AnyAdapter {
 					if !ok {
 						continue
 					}
-					for _, template := range templates {
-						text.Text = strings.Replace(
-							text.Text,
-							template.OldStr,
-							template.NewStr,
-							-1,
-						)
-					}
+					text.Text = replaceAll(text.Text, pairs)
 				}
 			}
 		}
@@ -44,40 +67,23 @@ func docxReplacer(templates []ReplacerTemplate) AnyAdapter {
 	})
 }
 
-func commonTextReplacer(templates []ReplacerTemplate, escapeMarkdown bool) AnyAdapter {
-	return Wrap(func(document *string) error {
-		for _, template := range templates {
-			var newStr string
-			if escapeMarkdown {
-				newStr = common.EscapeMarkdownV2(template.NewStr)
-			} else {
-				newStr = template.NewStr
-			}
+func commonTextReplacer(template ReplacerTemplate, escapeMarkdown bool) AnyAdapter {
+	pairs := makePairs(template, escapeMarkdown)
 
-			*document = strings.Replace(
-				*document,
-				template.OldStr,
-				newStr,
-				-1,
-			)
-		}
+	return Wrap(func(document *string) error {
+		*document = replaceAll(*document, pairs)
 		return nil
 	})
 }
 
-func NewReplacer(templates []ReplacerTemplate) AdaptersMap {
+func NewReplacer(template ReplacerTemplate) AdaptersMap {
 	return AdaptersMap{
-		common.Text:     commonTextReplacer(templates, false),
-		common.Markdown: commonTextReplacer(templates, true),
-		common.Docx:     docxReplacer(templates),
+		common.Text:     commonTextReplacer(template, false),
+		common.Markdown: commonTextReplacer(template, true),
+		common.Docx:     docxReplacer(template),
 	}
 }
 
 func NewSimpleReplacer(oldStr, newStr string) AdaptersMap {
-	return NewReplacer([]ReplacerTemplate{
-		{
-			OldStr: oldStr,
-			NewStr: newStr,
-		},
-	})
+	return NewReplacer(map[string]string{oldStr: newStr})
 }

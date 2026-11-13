@@ -30,9 +30,9 @@ var categories = []Category{
 				Name:        "Заменить все тире",
 				Description: "Заменяет все тире на знак минуса",
 				Adapters: adapter.NewReplacer(
-					[]adapter.ReplacerTemplate{
-						{OldStr: "—", NewStr: "-"},
-						{OldStr: "–", NewStr: "-"},
+					adapter.ReplacerTemplate{
+						"—": "-",
+						"–": "-",
 					},
 				),
 				EnabledByDefault: true,
@@ -54,9 +54,9 @@ var categories = []Category{
 				ID:          "replace-quotes",
 				Name:        "Заменить кавычки",
 				Description: "Заменяет «» на \"\"",
-				Adapters: adapter.NewReplacer([]adapter.ReplacerTemplate{
-					{OldStr: "«", NewStr: "\""},
-					{OldStr: "»", NewStr: "\""},
+				Adapters: adapter.NewReplacer(adapter.ReplacerTemplate{
+					"«": "\"",
+					"»": "\"",
 				}),
 				EnabledByDefault: true,
 			},
@@ -69,9 +69,9 @@ var categories = []Category{
 				ID:          "replace-arrows",
 				Name:        "Заменить стрелки",
 				Description: "Заменяет ← → на <- ->",
-				Adapters: adapter.NewReplacer([]adapter.ReplacerTemplate{
-					{OldStr: "←", NewStr: "<-"},
-					{OldStr: "→", NewStr: "->"},
+				Adapters: adapter.NewReplacer(adapter.ReplacerTemplate{
+					"←": "<-",
+					"→": "->",
 				}),
 			},
 		},
