@@ -33,17 +33,52 @@ func makePairs(template ReplacerTemplate, escapeMarkdown bool) []replacePair {
 	return pairs
 }
 
-func replaceAll(s string, pairs []replacePair) string {
-	for _, p := range pairs {
-		s = strings.ReplaceAll(s, p.oldStr, p.newStr)
+func replaceIdx(s, old, repl string) (string, []int) {
+	if old == "" {
+		return s, nil
 	}
-	return s
+	var idx []int
+	for pos := 0; ; {
+		i := strings.Index(s[pos:], old)
+		if i < 0 {
+			break
+		}
+		idx = append(idx, pos+i)
+		pos += i + len(old)
+	}
+	if len(idx) == 0 {
+		return s, nil
+	}
+
+	var b strings.Builder
+	b.Grow(len(s) + len(idx)*(len(repl)-len(old)))
+	prev := 0
+	for _, i := range idx {
+		b.WriteString(s[prev:i])
+		b.WriteString(repl)
+		prev = i + len(old)
+	}
+	b.WriteString(s[prev:])
+
+	return b.String(), idx
+}
+
+func replaceAllIdx(s string, pairs []replacePair) (string, []int) {
+	idx := make([]int, 0)
+	i := make([]int, 0)
+	for _, p := range pairs {
+		s, i = replaceIdx(s, p.oldStr, p.newStr)
+		idx = append(idx, i...)
+	}
+	return s, idx
 }
 
 func docxReplacer(template ReplacerTemplate) AnyAdapter {
 	pairs := makePairs(template, false)
 
-	return Wrap(func(document *docx.Docx) error {
+	return Wrap(Count, func(document *docx.Docx) (int, error) {
+		counter := 0
+
 		for _, item := range document.Document.Body.Items {
 			para, ok := item.(*docx.Paragraph)
 			if !ok {
@@ -59,20 +94,23 @@ func docxReplacer(template ReplacerTemplate) AnyAdapter {
 					if !ok {
 						continue
 					}
-					text.Text = replaceAll(text.Text, pairs)
+					idx := make([]int, 0)
+					text.Text, idx = replaceAllIdx(text.Text, pairs)
+					counter += len(idx)
 				}
 			}
 		}
-		return nil
+		return counter, nil
 	})
 }
 
 func commonTextReplacer(template ReplacerTemplate, escapeMarkdown bool) AnyAdapter {
 	pairs := makePairs(template, escapeMarkdown)
 
-	return Wrap(func(document *string) error {
-		*document = replaceAll(*document, pairs)
-		return nil
+	return Wrap(Indices, func(document *string) ([]int, error) {
+		idx := make([]int, 0)
+		*document, idx = replaceAllIdx(*document, pairs)
+		return idx, nil
 	})
 }
 

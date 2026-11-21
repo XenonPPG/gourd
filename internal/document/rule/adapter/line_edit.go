@@ -11,25 +11,28 @@ import (
 type effectFunc func(string) (output string, toBreak bool, err error)
 
 func commonTextLineEditor(effect effectFunc) AnyAdapter {
-	return Wrap(func(document *string) error {
+	return Wrap(Indices, func(document *string) ([]int, error) {
 		lines := strings.Split(*document, "\n")
+		idx := make([]int, 0)
 		for i, line := range lines {
 			newLine, toBreak, err := effect(line)
 			if err != nil {
-				return err
+				return nil, err
 			}
 			lines[i] = newLine
+			idx = append(idx, i)
 			if toBreak {
 				break
 			}
 		}
 		*document = strings.Join(lines, "\n")
-		return nil
+		return idx, nil
 	})
 }
 
 func docxLineEditor(effect effectFunc) AnyAdapter {
-	return Wrap(func(document *docx.Docx) error {
+	return Wrap(Count, func(document *docx.Docx) (int, error) {
+		replaceCount := 0
 		for _, item := range document.Document.Body.Items {
 			para, ok := item.(*docx.Paragraph)
 			if !ok {
@@ -48,16 +51,17 @@ func docxLineEditor(effect effectFunc) AnyAdapter {
 					}
 					newText, toBreak, err := effect(text.Text)
 					if err != nil {
-						return err
+						return 0, err
 					}
 					text.Text = newText
+					replaceCount++
 					if toBreak {
 						break
 					}
 				}
 			}
 		}
-		return nil
+		return replaceCount, nil
 	})
 }
 

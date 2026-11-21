@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"gourd/internal/common"
 	"gourd/internal/constants"
+	"gourd/internal/document/result"
 	"gourd/internal/document/rule"
 	"io"
 
@@ -46,13 +47,21 @@ func (d *DocxDocument) Write(out io.Writer) error {
 	return err
 }
 
-func (d *DocxDocument) Apply(rules []rule.Rule) error {
+func (d *DocxDocument) Apply(rules []rule.Rule) ([]result.Result, error) {
+	results := make([]result.Result, 0, len(rules))
 	for _, r := range rules {
-		if err := r.Apply(d.document, common.Docx); err != nil {
-			return err
+		res, err := r.Apply(d.document, common.Docx)
+		if err != nil {
+			return nil, err
+		}
+		if res != nil {
+			results = append(results, result.Result{
+				AnyResult: *res,
+				RuleID:    r.ID,
+			})
 		}
 	}
-	return nil
+	return results, nil
 }
 
 func validateZipEntries(files []*zip.File) error {

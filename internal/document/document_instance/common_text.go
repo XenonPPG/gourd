@@ -2,6 +2,7 @@ package document_instance
 
 import (
 	"gourd/internal/common"
+	"gourd/internal/document/result"
 	"gourd/internal/document/rule"
 	"gourd/internal/utils"
 	"io"
@@ -21,17 +22,24 @@ func (doc *CommonTextDocument) Read(in io.Reader) error {
 	return nil
 }
 
-func (doc *CommonTextDocument) Apply(rules []rule.Rule) error {
+func (doc *CommonTextDocument) Apply(rules []rule.Rule) ([]result.Result, error) {
 	fileType := utils.Ternary(doc.EscapeMarkdown, common.Markdown, common.Text)
+	results := make([]result.Result, 0, len(rules))
 
 	for _, r := range rules {
-		err := r.Apply(&doc.content, fileType)
+		res, err := r.Apply(&doc.content, fileType)
 		if err != nil {
-			return err
+			return nil, err
+		}
+		if res != nil {
+			results = append(results, result.Result{
+				AnyResult: *res,
+				RuleID:    r.ID,
+			})
 		}
 	}
 
-	return nil
+	return results, nil
 }
 
 func (doc *CommonTextDocument) Write(out io.Writer) error {

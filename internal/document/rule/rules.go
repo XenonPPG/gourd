@@ -112,10 +112,10 @@ func indexByID(cats []Category) map[string]Rule {
 	return reg
 }
 
-func (r Rule) Apply(doc any, fileType common.FileType) error {
+func (r Rule) Apply(doc any, fileType common.FileType) (*adapter.AnyResult, error) {
 	a, ok := r.Adapters[fileType]
 	if !ok {
-		return errors.New(fmt.Sprintf("adapter for %s not found", fileType))
+		return nil, errors.New(fmt.Sprintf("adapter for %s not found", fileType))
 	}
 	return a.Apply(doc)
 }

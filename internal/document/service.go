@@ -6,6 +6,7 @@ import (
 	"gourd/internal/common"
 	"gourd/internal/counter"
 	"gourd/internal/document/document_instance"
+	"gourd/internal/document/result"
 	"gourd/internal/document/rule"
 	"gourd/internal/workerpool"
 	"io"
@@ -15,13 +16,13 @@ import (
 
 type Service struct {
 	counterService *counter.Service
-	workerPool     *workerpool.Pool[*string]
+	workerPool     *workerpool.Pool[[]result.Result]
 }
 
 func New(workerCount int, counterService *counter.Service) *Service {
 	return &Service{
 		counterService: counterService,
-		workerPool:     workerpool.New[*string](workerCount),
+		workerPool:     workerpool.New[[]result.Result](workerCount),
 	}
 }
 
@@ -44,8 +45,8 @@ func NewDocument(fileType common.FileType) (Document, error) {
 	}
 }
 
-func (s *Service) Process(ctx context.Context, in io.Reader, out io.Writer, fileType common.FileType, ruleIDs []string) error {
-	_, err := s.workerPool.Do(ctx, func(fnCtx context.Context) (*string, error) {
+func (s *Service) Process(ctx context.Context, in io.Reader, out io.Writer, fileType common.FileType, ruleIDs []string) ([]result.Result, error) {
+	results, err := s.workerPool.Do(ctx, func(fnCtx context.Context) ([]result.Result, error) {
 		doc, err := NewDocument(fileType)
 		if err != nil {
 			return nil, err
@@ -64,7 +65,8 @@ func (s *Service) Process(ctx context.Context, in io.Reader, out io.Writer, file
 			return nil, fmt.Errorf("read: %w", err)
 		}
 
-		if err = doc.Apply(rules); err != nil {
+		res, err := doc.Apply(rules)
+		if err != nil {
 			return nil, fmt.Errorf("apply: %w", err)
 		}
 
@@ -74,21 +76,22 @@ func (s *Service) Process(ctx context.Context, in io.Reader, out io.Writer, file
 
 		s.counterService.Increment()
 
-		return nil, nil
+		return res, nil
 	})
 
-	return err
+	return results, err
 }
 
-func (s *Service) ProcessRaw(ctx context.Context, text string, ruleIDs []string, fileType common.FileType) (string, error) {
+func (s *Service) ProcessRaw(ctx context.Context, text string, ruleIDs []string, fileType common.FileType) (string, []result.Result, error) {
 	if fileType != common.Text && fileType != common.Markdown {
-		return "", fmt.Errorf("unsupported file type: %v", fileType)
+		return "", nil, fmt.Errorf("unsupported file type: %v", fileType)
 	}
 
 	var buf strings.Builder
-	err := s.Process(ctx, strings.NewReader(text), &buf, fileType, ruleIDs)
+	results, err := s.Process(ctx, strings.NewReader(text), &buf, fileType, ruleIDs)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
-	return buf.String(), nil
+
+	return buf.String(), results, nil
 }
