@@ -197,7 +197,7 @@
                             "additionalProperties": {
                                 "type": "array",
                                 "items": {
-                                    "$ref": "#/definitions/dto.CategoryDTO"
+                                    "$ref": "#/definitions/dto.Category"
                                 }
                             }
                         }
@@ -216,7 +216,7 @@
         }
     },
     "definitions": {
-        "dto.CategoryDTO": {
+        "dto.Category": {
             "type": "object",
             "properties": {
                 "name": {
@@ -225,12 +225,12 @@
                 "rules": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.RuleDTO"
+                        "$ref": "#/definitions/dto.Rule"
                     }
                 }
             }
         },
-        "dto.RuleDTO": {
+        "dto.Rule": {
             "type": "object",
             "properties": {
                 "available_formats": {
