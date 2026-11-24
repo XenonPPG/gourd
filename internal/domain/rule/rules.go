@@ -17,13 +17,15 @@ type Rule struct {
 }
 
 type Category struct {
-	Name  string
-	Rules []Rule
+	Name        string
+	Description string
+	Rules       []Rule
 }
 
-var categories = []Category{
+var registry = []Category{
 	{
-		Name: "Рекомендации",
+		Name:        "Рекомендации",
+		Description: "Безопасные правила, которые рекомендуется включить",
 		Rules: []Rule{
 			{
 				ID:          "replace-all-dashes",
@@ -63,7 +65,8 @@ var categories = []Category{
 		},
 	},
 	{
-		Name: "Другое",
+		Name:        "Другое",
+		Description: "Правила, которые могут быть вам полезны",
 		Rules: []Rule{
 			{
 				ID:          "replace-arrows",
@@ -85,7 +88,8 @@ var categories = []Category{
 		},
 	},
 	{
-		Name: "Особое",
+		Name:        "Особое",
+		Description: "Правила, которые сильно влияют на текст",
 		Rules: []Rule{
 			{
 				ID:          "remove-semicolon",
@@ -105,7 +109,7 @@ var categories = []Category{
 }
 
 func Registry() []Category {
-	return categories
+	return registry
 }
 
 var QuickRegistry = indexByID(Registry())

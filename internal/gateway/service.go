@@ -72,8 +72,9 @@ func (s *Service) registerDTO() {
 		}
 
 		return dto.Category{
-			Name:  category.Name,
-			Rules: rules,
+			Name:        category.Name,
+			Description: category.Description,
+			Rules:       rules,
 		}
 	})
 

@@ -12,7 +12,13 @@ import (
 func main() {
 	var text strings.Builder
 	for _, cat := range rule.Registry() {
+		// category name
 		text.WriteString(fmt.Sprintf("### %s\n", cat.Name))
+
+		// description
+		text.WriteString(fmt.Sprintf("**%s**\n", cat.Description))
+
+		// rules
 		for _, r := range cat.Rules {
 			text.WriteString(fmt.Sprintf(
 				"- %s: `%s`\n",
