@@ -1,6 +1,6 @@
 package result
 
-import "gourd/internal/document/rule/adapter"
+import "gourd/internal/domain/rule/adapter"
 
 type Result struct {
 	adapter.AnyResult

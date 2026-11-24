@@ -1,4 +1,4 @@
-package document_instance
+package document
 
 import (
 	"archive/zip"
@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"gourd/internal/common"
 	"gourd/internal/constants"
-	"gourd/internal/document/result"
-	"gourd/internal/document/rule"
+	"gourd/internal/domain/result"
+	"gourd/internal/domain/rule"
 	"io"
 
 	"github.com/fumiama/go-docx"

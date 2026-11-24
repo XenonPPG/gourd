@@ -58,6 +58,6 @@ func Wrap[D, R any](key string, fn Effect[D, R]) AnyAdapter {
 
 type AdaptersMap map[common.FileType]AnyAdapter
 
-func (m AdaptersMap) AvailableAdapters() []common.FileType {
+func (m AdaptersMap) AvailableFileTypes() []common.FileType {
 	return slices.Collect(maps.Keys(m))
 }

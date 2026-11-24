@@ -14,7 +14,7 @@ type Config struct {
 	} `yaml:"server"`
 	DocumentService struct {
 		WorkerCount int `yaml:"worker-count"`
-	} `yaml:"document-service"`
+	} `yaml:"domain-service"`
 
 	DevMode bool `yaml:"-"`
 }

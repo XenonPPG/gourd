@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"gourd/internal/common"
-	"gourd/internal/document/rule/adapter"
+	"gourd/internal/domain/rule/adapter"
 	"strings"
 )
 

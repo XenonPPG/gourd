@@ -1,9 +1,9 @@
-package document_instance
+package document
 
 import (
 	"gourd/internal/common"
-	"gourd/internal/document/result"
-	"gourd/internal/document/rule"
+	"gourd/internal/domain/result"
+	"gourd/internal/domain/rule"
 	"gourd/internal/utils"
 	"io"
 )

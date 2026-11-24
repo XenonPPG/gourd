@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"gourd/internal/common"
-	"gourd/internal/document/rule"
+	"gourd/internal/domain/rule"
 	"log"
 	"os"
 	"strings"

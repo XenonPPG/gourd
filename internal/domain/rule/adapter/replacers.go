@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"gourd/internal/common"
+	"gourd/internal/constants"
 	"sort"
 	"strings"
 
@@ -63,14 +64,50 @@ func replaceIdx(s, old, repl string) (string, []int) {
 	return b.String(), idx
 }
 
-func replaceAllIdx(s string, pairs []replacePair) (string, []int) {
+func replaceCounter(s, old, repl string) (string, int) {
+	n := strings.Count(s, old)
+	if n == 0 {
+		return s, 0
+	}
+	return strings.Replace(s, old, repl, n), n
+}
+
+func replaceAllIdx(s string, pairs []replacePair) (string, IndicesResult) {
 	idx := make([]int, 0)
 	i := make([]int, 0)
+
+	counter := 0
+	c := 0
+
 	for _, p := range pairs {
-		s, i = replaceIdx(s, p.oldStr, p.newStr)
-		idx = append(idx, i...)
+		if counter < constants.MaxChangesListLength {
+			s, i = replaceIdx(s, p.oldStr, p.newStr)
+			idx = append(idx, i...)
+			counter += len(idx)
+		} else {
+			s, c = replaceCounter(s, p.oldStr, p.newStr)
+			counter += c
+		}
 	}
-	return s, idx
+
+	idx = idx[:min(len(idx), constants.MaxChangesListLength)]
+
+	return s, IndicesResult{
+		Indices:    idx,
+		TotalCount: counter,
+	}
+}
+
+func replaceAllCounter(s string, pairs []replacePair) (string, int) {
+	counter := 0
+	c := 0
+
+	for _, p := range pairs {
+		s, c = replaceCounter(s, p.oldStr, p.newStr)
+		counter += c
+	}
+
+	return s, counter
 }
 
 func docxReplacer(template ReplacerTemplate) AnyAdapter {
@@ -94,9 +131,9 @@ func docxReplacer(template ReplacerTemplate) AnyAdapter {
 					if !ok {
 						continue
 					}
-					idx := make([]int, 0)
-					text.Text, idx = replaceAllIdx(text.Text, pairs)
-					counter += len(idx)
+					c := 0
+					text.Text, c = replaceAllCounter(text.Text, pairs)
+					counter += c
 				}
 			}
 		}
@@ -107,10 +144,10 @@ func docxReplacer(template ReplacerTemplate) AnyAdapter {
 func commonTextReplacer(template ReplacerTemplate, escapeMarkdown bool) AnyAdapter {
 	pairs := makePairs(template, escapeMarkdown)
 
-	return Wrap(Indices, func(document *string) ([]int, error) {
-		idx := make([]int, 0)
-		*document, idx = replaceAllIdx(*document, pairs)
-		return idx, nil
+	return Wrap(Indices, func(document *string) (IndicesResult, error) {
+		var res IndicesResult
+		*document, res = replaceAllIdx(*document, pairs)
+		return res, nil
 	})
 }
 

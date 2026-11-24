@@ -1,8 +1,8 @@
-package document
+package domain
 
 import (
-	"gourd/internal/document/result"
-	"gourd/internal/document/rule"
+	"gourd/internal/domain/result"
+	"gourd/internal/domain/rule"
 	"io"
 )
 

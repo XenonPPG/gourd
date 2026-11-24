@@ -3,10 +3,15 @@ package gateway
 import (
 	"gourd/internal/config"
 	"gourd/internal/constants"
+	"gourd/internal/domain/counter"
+	"gourd/internal/domain/result"
+	"gourd/internal/domain/rule"
+	"gourd/internal/domain/rule/adapter"
+	"gourd/internal/gateway/dto"
+	"gourd/internal/gateway/dto/dtoregistry"
 	"time"
 
-	"gourd/internal/counter"
-	"gourd/internal/document"
+	"gourd/internal/domain"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
@@ -15,12 +20,13 @@ import (
 
 type Service struct {
 	app             *fiber.App
-	documentService *document.Service
+	documentService *domain.Service
 	counterService  *counter.Service
 	config          config.Config
+	dtoRegistry     *dtoregistry.Registry
 }
 
-func New(documentService *document.Service, counterService *counter.Service, config config.Config) *Service {
+func New(documentService *domain.Service, counterService *counter.Service, config config.Config) *Service {
 	fiberApp := fiber.New(fiber.Config{
 		BodyLimit: constants.MaxTotalSize,
 	})
@@ -30,10 +36,65 @@ func New(documentService *document.Service, counterService *counter.Service, con
 		documentService: documentService,
 		counterService:  counterService,
 		config:          config,
+		dtoRegistry:     dtoregistry.NewRegistry(),
 	}
 
 	s.setupRoutes()
+	s.registerDTO()
+
 	return s
+}
+
+func (s *Service) registerDTO() {
+	ruleToDTO := func(r rule.Rule) dto.RuleDTO {
+		availableFormats := make([]string, 0, len(r.Adapters))
+		for _, a := range r.Adapters.AvailableFileTypes() {
+			availableFormats = append(availableFormats, string(a))
+		}
+
+		return dto.RuleDTO{
+			ID:               r.ID,
+			Name:             r.Name,
+			Description:      r.Description,
+			EnabledByDefault: r.EnabledByDefault,
+			AvailableFormats: availableFormats,
+		}
+	}
+
+	// rule
+	s.dtoRegistry.Register(ruleToDTO)
+
+	// category
+	s.dtoRegistry.Register(func(category rule.Category) dto.CategoryDTO {
+		rules := make([]dto.RuleDTO, 0, len(category.Rules))
+		for _, r := range category.Rules {
+			rules = append(rules, ruleToDTO(r))
+		}
+
+		return dto.CategoryDTO{
+			Name:  category.Name,
+			Rules: rules,
+		}
+	})
+
+	// indices result
+	s.dtoRegistry.Register(func(ir adapter.IndicesResult) dto.IndicesResultDTO {
+		return dto.IndicesResultDTO{
+			Indices:    ir.Indices,
+			TotalCount: ir.TotalCount,
+		}
+	})
+
+	// result
+	s.dtoRegistry.Register(func(res result.Result) dto.ResultDTO {
+		d, _ := s.dtoRegistry.Match(res.Result)
+
+		return dto.ResultDTO{
+			Result: d,
+			Key:    res.Key,
+			RuleID: res.RuleID,
+		}
+	})
 }
 
 func (s *Service) setupRoutes() {

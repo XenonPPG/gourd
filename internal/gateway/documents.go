@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"gourd/internal/common"
-	"gourd/internal/document/result"
 	"log"
 	"mime/multipart"
 
@@ -22,37 +21,16 @@ type ProcessDocumentRequest struct {
 // ProcessDocumentResponseMeta is the processing metadata returned in the
 // X-Process-Meta response header (JSON, base64-encoded).
 type ProcessDocumentResponseMeta struct {
-	FileType string      `json:"file_type"`
-	Results  []ResultDTO `json:"results"`
-}
-
-// ResultDTO is the result produced by a single processing rule.
-type ResultDTO struct {
-	Result any    `json:"result"`
-	Key    string `json:"key"`
-	RuleID string `json:"rule_id"`
+	FileType string `json:"file_type"`
+	Results  any    `json:"results"`
 }
 
 const xProcessMeta = "X-Process-Meta"
 
-func resultsToDTO(results []result.Result) []ResultDTO {
-	res := make([]ResultDTO, 0)
-
-	for _, r := range results {
-		res = append(res, ResultDTO{
-			Result: r.Result,
-			Key:    r.Key,
-			RuleID: r.RuleID,
-		})
-	}
-
-	return res
-}
-
-// ProcessFile processes an uploaded document file
+// ProcessFile processes an uploaded domain file
 //
-//	@Summary       Process a document file
-//	@Description   Uploads a document file and applies the specified processing rules to it, returning the processed binary content.
+//	@Summary       Process a domain file
+//	@Description   Uploads a domain file and applies the specified processing rules to it, returning the processed binary content.
 //	@Description   The file type must be given in the file_type field.
 //	@Description   At least one rule must be specified in the rules field.
 //	@Description   Processing metadata is returned in the X-Process-Meta response header: a base64-encoded JSON object with the file type and the results of the applied rules,
@@ -62,9 +40,9 @@ func resultsToDTO(results []result.Result) []ResultDTO {
 //	@Accept        multipart/form-data
 //	@Produce       application/octet-stream
 //	@Param         file       formData  file      true   "Document file to process"
-//	@Param         file_type  formData  string    true   "Type of the uploaded document"
+//	@Param         file_type  formData  string    true   "Type of the uploaded domain"
 //	@Param         rules      formData  []string  true   "List of rule IDs to apply (at least one required)"  collectionFormat(multi)
-//	@Success       200        {file}    file                "Processed document"
+//	@Success       200        {file}    file                "Processed domain"
 //	@Header        200        {string}  X-Process-Meta      "Base64-encoded JSON with processing metadata (file_type, results)"
 //	@Failure       400        {object}  map[string]string   "Invalid request body or no rules specified"
 //	@Failure       500        {object}  map[string]string   "File read or processing error (including unsupported file type)"
@@ -96,9 +74,15 @@ func (s *Service) ProcessFile(c fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
+
+	// result
+	results, err := s.dtoRegistry.Match(res)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
 	meta := ProcessDocumentResponseMeta{
 		FileType: req.FileType,
-		Results:  resultsToDTO(res),
+		Results:  results,
 	}
 	headerMeta, err := json.Marshal(meta)
 	if err != nil {
@@ -118,7 +102,7 @@ type ProcessRawRequest struct {
 	Rules    []string `json:"rules,omitempty"`
 }
 
-// ProcessRaw processes raw text content as a document
+// ProcessRaw processes raw text content as a domain
 //
 //	@Summary      Process raw text content
 //	@Description  Applies the specified processing rules to raw text content of a given file type. Currently only "markdown" is supported as a file type.
@@ -128,9 +112,9 @@ type ProcessRawRequest struct {
 //	@Accept       json
 //	@Produce      json
 //	@Param        request  body      ProcessRawRequest  true  "Raw content, file type and rules to apply (rules must not be empty)"
-//	@Success      201      {object}  map[string]any     "Processed output and rule results, e.g. {\"output\": \"...\", \"result\": [{\"key\": \"some_rule\", \"result\": \"...\"}]}"
-//	@Failure      400      {object}  map[string]string  "Invalid request body or no rules specified"
-//	@Failure      500      {object}  map[string]string  "Processing error (including unsupported file type)"
+//	@Success      201      {object}  map[string]any         "Processed output and rule results, e.g. {\"output\": \"...\", \"result\": [{\"key\": \"some_rule\", \"result\": \"...\"}]}"
+//	@Failure      400      {object}  map[string]string      "Invalid request body or no rules specified"
+//	@Failure      500      {object}  map[string]string      "Processing error (including unsupported file type)"
 //	@Router       /documents/raw [post]
 func (s *Service) ProcessRaw(c fiber.Ctx) error {
 	req := new(ProcessRawRequest)
@@ -146,8 +130,12 @@ func (s *Service) ProcessRaw(c fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
+	results, err := s.dtoRegistry.Match(res)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"output": output,
-		"result": resultsToDTO(res),
+		"result": results,
 	})
 }

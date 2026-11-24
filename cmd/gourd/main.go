@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"gourd/internal/config"
-	"gourd/internal/counter"
-	"gourd/internal/document"
+	"gourd/internal/domain"
+	"gourd/internal/domain/counter"
 	"gourd/internal/gateway"
 	"log"
 	"os"
@@ -48,7 +48,7 @@ func run() error {
 	log.Println("counter initialized")
 
 	// services
-	documentService := document.New(cfg.DocumentService.WorkerCount, counterService)
+	documentService := domain.New(cfg.DocumentService.WorkerCount, counterService)
 	gatewayService := gateway.New(documentService, counterService, cfg)
 
 	serverErr := make(chan error, 1)
@@ -79,9 +79,9 @@ func run() error {
 		}
 	}
 
-	log.Println("stopping document service...")
+	log.Println("stopping domain service...")
 	if err := documentService.Shutdown(cfg.Server.ShutdownTimeout); err != nil {
-		log.Println("failed to stop document service: ", err)
+		log.Println("failed to stop domain service: ", err)
 	}
 
 	log.Println("saving counter...")

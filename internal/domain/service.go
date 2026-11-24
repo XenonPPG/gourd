@@ -1,14 +1,14 @@
-package document
+package domain
 
 import (
 	"context"
 	"fmt"
 	"gourd/internal/common"
-	"gourd/internal/counter"
-	"gourd/internal/document/document_instance"
-	"gourd/internal/document/result"
-	"gourd/internal/document/rule"
-	"gourd/internal/workerpool"
+	"gourd/internal/domain/counter"
+	"gourd/internal/domain/document"
+	"gourd/internal/domain/result"
+	"gourd/internal/domain/rule"
+	"gourd/internal/domain/workerpool"
 	"io"
 	"strings"
 	"time"
@@ -35,11 +35,11 @@ func (s *Service) Shutdown(timeout time.Duration) error {
 func NewDocument(fileType common.FileType) (Document, error) {
 	switch fileType {
 	case common.Text:
-		return &document_instance.CommonTextDocument{EscapeMarkdown: false}, nil
+		return &document.CommonTextDocument{EscapeMarkdown: false}, nil
 	case common.Markdown:
-		return &document_instance.CommonTextDocument{EscapeMarkdown: true}, nil
+		return &document.CommonTextDocument{EscapeMarkdown: true}, nil
 	case common.Docx:
-		return &document_instance.DocxDocument{}, nil
+		return &document.DocxDocument{}, nil
 	default:
 		return nil, fmt.Errorf("unsupported file type: %v", fileType)
 	}
