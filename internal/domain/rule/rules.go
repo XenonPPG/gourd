@@ -74,6 +74,14 @@ var categories = []Category{
 					"→": "->",
 				}),
 			},
+			{
+				ID:          "replace-tangent",
+				Name:        "Заменить тангенс",
+				Description: "Заменяет tan на tg",
+				Adapters: adapter.NewReplacer(adapter.ReplacerTemplate{
+					"tan": "tg",
+				}),
+			},
 		},
 	},
 	{
