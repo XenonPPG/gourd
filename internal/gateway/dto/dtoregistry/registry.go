@@ -53,5 +53,7 @@ func (r *Registry) Match(v any) (any, error) {
 		}
 		return out, nil
 	}
-	return nil, fmt.Errorf("%w for %T", ErrNoConverter, v)
+
+	// ignore error, return value as is
+	return v, nil
 }
