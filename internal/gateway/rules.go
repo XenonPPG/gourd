@@ -15,7 +15,7 @@ import (
 //	@Description	If the rules cannot be built from the registry, the endpoint responds with 500.
 //	@Tags			rules
 //	@Produce		json
-//	@Success		200	{object}	map[string][]dto.CategoryDTO	"Rule categories with their rules (response body: {\"categories\": [...]})"
+//	@Success		200	{object}	map[string][]dto.Category	"Rule categories with their rules (response body: {\"categories\": [...]})"
 //	@Failure		500	{object}	map[string]string				"Failed to build rules from the registry (response body: {\"error\": \"...\"})"
 //	@Router			/rules [get]
 func (s *Service) ListRules(c fiber.Ctx) error {

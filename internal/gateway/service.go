@@ -46,13 +46,13 @@ func New(documentService *domain.Service, counterService *counter.Service, confi
 }
 
 func (s *Service) registerDTO() {
-	ruleToDTO := func(r rule.Rule) dto.RuleDTO {
+	ruleToDTO := func(r rule.Rule) dto.Rule {
 		availableFormats := make([]string, 0, len(r.Adapters))
 		for _, a := range r.Adapters.AvailableFileTypes() {
 			availableFormats = append(availableFormats, string(a))
 		}
 
-		return dto.RuleDTO{
+		return dto.Rule{
 			ID:               r.ID,
 			Name:             r.Name,
 			Description:      r.Description,
@@ -65,31 +65,31 @@ func (s *Service) registerDTO() {
 	s.dtoRegistry.Register(ruleToDTO)
 
 	// category
-	s.dtoRegistry.Register(func(category rule.Category) dto.CategoryDTO {
-		rules := make([]dto.RuleDTO, 0, len(category.Rules))
+	s.dtoRegistry.Register(func(category rule.Category) dto.Category {
+		rules := make([]dto.Rule, 0, len(category.Rules))
 		for _, r := range category.Rules {
 			rules = append(rules, ruleToDTO(r))
 		}
 
-		return dto.CategoryDTO{
+		return dto.Category{
 			Name:  category.Name,
 			Rules: rules,
 		}
 	})
 
 	// indices result
-	s.dtoRegistry.Register(func(ir adapter.IndicesResult) dto.IndicesResultDTO {
-		return dto.IndicesResultDTO{
+	s.dtoRegistry.Register(func(ir adapter.IndicesResult) dto.IndicesResult {
+		return dto.IndicesResult{
 			Indices:    ir.Indices,
 			TotalCount: ir.TotalCount,
 		}
 	})
 
 	// result
-	s.dtoRegistry.Register(func(res result.Result) dto.ResultDTO {
+	s.dtoRegistry.Register(func(res result.Result) dto.Result {
 		d, _ := s.dtoRegistry.Match(res.Result)
 
-		return dto.ResultDTO{
+		return dto.Result{
 			Result: d,
 			Key:    res.Key,
 			RuleID: res.RuleID,

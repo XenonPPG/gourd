@@ -1,7 +1,7 @@
 package dto
 
-// CategoryDTO represents Category, a group of rules (RuleDTO specifically).
-type CategoryDTO struct {
-	Name  string    `json:"name,omitempty"`
-	Rules []RuleDTO `json:"rules,omitempty"`
+// Category represents Category, a group of rules (Rule specifically).
+type Category struct {
+	Name  string `json:"name,omitempty"`
+	Rules []Rule `json:"rules,omitempty"`
 }

@@ -1,7 +1,7 @@
 package dto
 
-// RuleDTO represents rule general information
-type RuleDTO struct {
+// Rule represents rule general information
+type Rule struct {
 	ID               string   `json:"id,omitempty"`
 	Name             string   `json:"name,omitempty"`
 	Description      string   `json:"description,omitempty"`
