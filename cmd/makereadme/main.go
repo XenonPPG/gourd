@@ -19,11 +19,12 @@ func main() {
 		text.WriteString(fmt.Sprintf("**%s**\n", cat.Description))
 
 		// rules
-		for _, r := range cat.Rules {
+		text.WriteString("|Правило|Эффект|\n|:-|-:|\n")
+		for _, rule := range cat.Rules {
 			text.WriteString(fmt.Sprintf(
-				"- %s: `%s`\n",
-				common.EscapeMarkdownV2(r.Name),
-				r.Description,
+				"|%s|%s|\n",
+				rule.Name,
+				common.EscapeMarkdownV2(rule.Description),
 			))
 		}
 	}
